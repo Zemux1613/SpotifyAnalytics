@@ -1,0 +1,84 @@
+<section class="page audio-page">
+  <header class="page__head audio-page__head">
+    <div>
+      <p class="audio-page__eyebrow">SPOTIFY ANALYTICS</p>
+      <h1>Audio-Analyse</h1>
+      <p class="muted audio-page__intro">Entdecke Tempo, Klangfarbe, Rhythmus und die geschätzte Stimmung eines Songs.</p>
+    </div>
+  </header>
+
+  <form class="search-form audio-search" role="search" (submit)="search($event)">
+    <label class="visually-hidden" for="audio-track-query">Song oder Künstler suchen</label>
+    <input
+      id="audio-track-query"
+      type="search"
+      name="q"
+      maxlength="100"
+      autocomplete="off"
+      placeholder="Song oder Künstler suchen …"
+      [value]="query()"
+      (input)="onInput($event)"
+    >
+    <button class="btn" type="submit" [disabled]="searching() || !query().trim()">Analysieren</button>
+  </form>
+
+  @if (searchError(); as message) {
+    <p class="state state--error" role="alert">{{ message }}</p>
+  } @else if (searching()) {
+    <p class="state" aria-live="polite">Suche läuft …</p>
+  } @else if (results(); as tracks) {
+    @if (tracks.length === 0) {
+      <p class="state">Keine Songs für „{{ lastQuery() }}“ gefunden. Versuche es mit einem anderen Suchbegriff.</p>
+    } @else {
+      <div class="audio-workspace">
+        <aside class="audio-picker">
+          <h2>Suchergebnisse</h2>
+          <p class="muted audio-picker__hint">Wähle einen Song für die Analyse.</p>
+          <ul class="results" aria-label="Gefundene Songs">
+            @for (track of tracks; track track.id) {
+              <li>
+                <button
+                  type="button"
+                  class="result"
+                  [attr.aria-current]="track.id === selectedId() ? 'true' : null"
+                  (click)="select(track)"
+                >
+                  @if (image(track.album.images, 96); as src) {
+                    <img class="cover-s" [src]="src" alt="" width="48" height="48">
+                  } @else {
+                    <span class="cover-s avatar--empty"></span>
+                  }
+                  <span class="item__text">
+                    <span class="item__title">{{ track.name }}</span>
+                    <span class="muted">{{ artistNames(track) }}</span>
+                    <span class="muted muted--small">{{ track.album.name }}</span>
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        </aside>
+
+        <section class="audio-result" aria-live="polite" aria-label="Audio-Analyse-Ergebnis">
+          @if (detailsError(); as message) {
+            <p class="state state--error" role="alert">{{ message }}</p>
+          } @else if (loadingDetails()) {
+            <p class="state">Songdetails werden geladen …</p>
+          } @else if (details(); as selected) {
+            <app-track-details [data]="selected" />
+          } @else {
+            <p class="state">Wähle links einen Song aus.</p>
+          }
+        </section>
+      </div>
+    }
+  } @else {
+    <div class="audio-empty">
+      <div class="audio-empty__icon" aria-hidden="true">♫</div>
+      <h2>Wie klingt dein Lieblingssong?</h2>
+      <p class="muted">Suche nach einem Titel oder Künstler. Die Analyse verwendet das verfügbare Spotify-Preview-Snippet.</p>
+    </div>
+  }
+
+  <p class="audio-disclaimer">Hinweis: Die Analyse basiert auf einem kurzen Preview-Ausschnitt, sofern Spotify einen bereitstellt. Stimmung und Klangmerkmale sind algorithmische Schätzungen und keine offiziellen Spotify-Audio-Features.</p>
+</section>
