@@ -273,6 +273,10 @@ class PlaylistOverviewItem(BaseModel):
     is_owned: bool
     in_model: bool
     genres: list[PlaylistGenreItem] = []
+    duration_ms: int | None = None
+    avg_release_year: int | None = None
+    avg_bpm: float | None = None
+    dominant_mood: str | None = None
 
 class PlaylistsOverviewResponse(BaseModel):
     items: list[PlaylistOverviewItem]

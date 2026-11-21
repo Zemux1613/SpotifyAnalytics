@@ -12,6 +12,7 @@ from app.api.schemas import (
 )
 from app.api.deps import (
     AccessTokenDep,
+    AudioAnalysisServiceDep,
     PlaylistServiceDep,
     RecommenderServiceDep,
     SessionIdDep
@@ -111,15 +112,24 @@ def _pick_image(images: list[dict[str, Any]] | None, target: int = 64) -> str | 
 def get_playlists_overview(
     playlists: PlaylistServiceDep,
     recommender: RecommenderServiceDep,
+    audio: AudioAnalysisServiceDep,
     token: AccessTokenDep,
     session_id: SessionIdDep,
     include_followed: bool = Query(default=False, description="Auch abonnierte fremde Playlists anzeigen"),
 ) -> PlaylistsOverviewResponse:
-    user_id, genres_by_playlist, model_trained = recommender.get_playlist_genre_overview(token, session_id)
+    user_id, genres_by_playlist, metrics_by_playlist, model_trained = (
+        recommender.get_playlist_genre_overview(token, session_id)
+    )
+    for m in metrics_by_playlist.values():
+        avg_bpm, dominant_mood = audio.playlist_vibe(m.get("track_ids") or [])
+        m["avg_bpm"] = avg_bpm
+        m["dominant_mood"] = dominant_mood
+
     return playlists.get_playlists_overview(
         access_token=token,
         user_id=user_id,
         genres_by_playlist=genres_by_playlist,
+        metrics_by_playlist=metrics_by_playlist,
         model_trained=model_trained,
         include_followed=include_followed,
     )

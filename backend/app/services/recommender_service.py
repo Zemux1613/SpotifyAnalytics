@@ -200,10 +200,9 @@ class RecommenderService:
         return self.get_model_status(access_token, session_id)
 
     def get_playlist_genre_overview(
-        self, access_token: str, 
-        session_id: str | None
-    ) -> tuple[str, dict[str, list[dict[str, Any]]], bool]:
-        """Liefert (user_id, genres_by_playlist, model_trained) aus dem gecachten Modell."""
+        self, access_token: str, session_id: str | None
+    ) -> tuple[str, dict[str, list[dict[str, Any]]], dict[str, dict[str, Any]], bool]:
+        """Liefert (user_id, genres_by_playlist, metrics_by_playlist, model_trained)."""
         profile = self._client.get("/me", access_token)
         user_id = profile.get("id") or ""
 
@@ -213,6 +212,6 @@ class RecommenderService:
         age = time.monotonic() - entry[0] if entry else None
 
         if entry is None or age >= CACHE_TTL:
-            return user_id, {}, False
+            return user_id, {}, {}, False
 
-        return user_id, entry[1].playlist_genres(), True
+        return user_id, entry[1].playlist_genres(), entry[1].playlist_metrics(), True

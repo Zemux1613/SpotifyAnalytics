@@ -88,39 +88,65 @@
       @for (pl of filteredItems(); track pl.id) {
         <article class="playlist-card">
           <div class="playlist-card__head">
-            @if (pl.image_url) {
-              <img class="cover-m" [src]="pl.image_url" [alt]="pl.name" loading="lazy" />
-            } @else {
-              <div class="cover-m" aria-hidden="true"></div>
-            }
-
-            <div class="playlist-card__meta">
-              @if (pl.spotify_url) {
-                <a
-                  class="item__title"
-                  [href]="pl.spotify_url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ pl.name }}
-                </a>
+            <div class="cover-wrap">
+              @if (pl.image_url) {
+                <img class="cover-m" [src]="pl.image_url" [alt]="pl.name" loading="lazy" />
               } @else {
-                <span class="item__title">{{ pl.name }}</span>
+                <div class="cover-m" aria-hidden="true"></div>
               }
-
-              <span class="muted muted--small">
-                {{ pl.tracks_total }} {{ pl.tracks_total === 1 ? 'Song' : 'Songs' }}
-                @if (!pl.is_owned && pl.owner_name) {
-                  · von {{ pl.owner_name }}
-                }
-              </span>
             </div>
 
-            @if (pl.in_model) {
-              <span class="pill pill--ok">Trainiert</span>
-            } @else {
-              <span class="pill">Nicht im Modell</span>
-            }
+            <div class="playlist-card__meta">
+              <div class="playlist-card__title-row">
+                @if (pl.spotify_url) {
+                  <a
+                    class="item__title"
+                    [href]="pl.spotify_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [title]="pl.name"
+                  >
+                    {{ pl.name }}
+                  </a>
+                } @else {
+                  <span class="item__title" [title]="pl.name">{{ pl.name }}</span>
+                }
+
+                <span
+                  class="status-dot"
+                  [class.status-dot--ok]="pl.in_model"
+                  [title]="pl.in_model ? 'Im Modell trainiert' : 'Nicht im Modell'"
+                ></span>
+              </div>
+
+              <span class="muted muted--small meta-line">
+                {{ pl.tracks_total }} {{ pl.tracks_total === 1 ? 'Song' : 'Songs' }}
+                @if (formatDuration(pl.duration_ms); as dur) {
+                  · {{ dur }}
+                }
+                @if (pl.avg_release_year) {
+                  · Ø {{ pl.avg_release_year }}
+                }
+              </span>
+
+              @if (!pl.is_owned && pl.owner_name) {
+                <span class="muted muted--small">von {{ pl.owner_name }}</span>
+              }
+
+              @if (pl.avg_bpm || pl.dominant_mood) {
+                <div class="vibe-badge">
+                  @if (pl.avg_bpm) {
+                    <span>{{ pl.avg_bpm | number: '1.0-0' }} BPM</span>
+                  }
+                  @if (pl.avg_bpm && pl.dominant_mood) {
+                    <span>·</span>
+                  }
+                  @if (pl.dominant_mood) {
+                    <span>{{ pl.dominant_mood }}</span>
+                  }
+                </div>
+              }
+            </div>
           </div>
 
           @if ((pl.genres?.length ?? 0) > 0) {

@@ -40,6 +40,8 @@ class TrainedPlaylist:
     genre_vector: np.ndarray | None
     top_genres: list[str] = field(default_factory=list)
     genre_counts: list[tuple[str, int]] = field(default_factory=list)
+    duration_ms: int = 0
+    avg_release_year: int | None = None
 
 
 def _artist_objects(
@@ -184,6 +186,11 @@ class PlaylistClassifier:
             if norm > 0:
                 genre_vector /= norm
 
+            playlist_tracks = tracks_by_playlist.get(playlist_id) or []
+            total_duration_ms = sum(int(t.get("duration_ms") or 0) for t in playlist_tracks)
+            years = [y for t in playlist_tracks if (y := _release_year(t)) > 0]
+            avg_year = round(sum(years) / len(years)) if years else None
+
             self._trained.append(
                 TrainedPlaylist(
                     playlist_id=playlist_id,
@@ -196,6 +203,8 @@ class PlaylistClassifier:
                     genre_vector=genre_vector if norm > 0 else None,
                     top_genres=[genre for genre, _ in genre_profile.most_common(3)],
                     genre_counts=genre_profile.most_common(5),
+                    duration_ms=total_duration_ms,
+                    avg_release_year=avg_year,
                 )
             )
 
@@ -211,6 +220,17 @@ class PlaylistClassifier:
                 for name, count in pl.genre_counts
             ]
         return result
+
+    def playlist_metrics(self) -> dict[str, dict[str, Any]]:
+        """Liefert Track-IDs, Gesamtdauer und Ø-Erscheinungsjahr pro Playlist-ID."""
+        return {
+            pl.playlist_id: {
+                "track_ids": pl.track_ids,
+                "duration_ms": pl.duration_ms,
+                "avg_release_year": pl.avg_release_year,
+            }
+            for pl in self._trained
+        }
 
     @property
     def _feature_count(self) -> int:

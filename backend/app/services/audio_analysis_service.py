@@ -111,6 +111,26 @@ class AudioAnalysisService:
                 )
             return result
 
+    def playlist_vibe(self, track_ids: Iterable[str]) -> tuple[float | None, str | None]:
+        """Berechnet Ø-BPM und dominante Stimmung aus bereits abgeschlossenen Track-Analysen."""
+        from collections import Counter
+
+        bpms: list[float] = []
+        moods: Counter[str] = Counter()
+        with self._lock:
+            for tid in track_ids:
+                job = self._jobs.get(tid)
+                if job and job.status == "completed" and job.features:
+                    bpms.append(job.features.tempo_bpm)
+                    if job.features.mood:
+                        moods[job.features.mood] += 1
+
+        if not bpms:
+            return None, None
+        avg_bpm = round(sum(bpms) / len(bpms), 1)
+        dominant_mood = moods.most_common(1)[0][0] if moods else None
+        return avg_bpm, dominant_mood
+
     def get_status(self, track_id: str) -> AudioAnalysisResponse:
         with self._lock:
             return self._jobs.get(

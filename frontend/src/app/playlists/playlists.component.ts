@@ -63,7 +63,7 @@ export class PlaylistsComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     this.playlistsApi
-      .getPlaylistsOverviewPlaylistsOverviewGet({ includeFollowed: this.includeFollowed() })
+      .getPlaylistsOverview({ includeFollowed: this.includeFollowed() })
       .subscribe({
         next: (res) => {
           this.items.set(res.items ?? []);
@@ -94,5 +94,13 @@ export class PlaylistsComponent implements OnInit {
 
   clearSearch(): void {
     this.searchQuery.set('');
+  }
+
+  formatDuration(ms?: number | null): string | null {
+    if (!ms || ms <= 0) return null;
+    const totalMinutes = Math.round(ms / 60_000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours} Std. ${minutes} Min.` : `${minutes} Min.`;
   }
 }

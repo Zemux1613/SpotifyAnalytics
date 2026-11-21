@@ -662,7 +662,7 @@
           "playlists"
         ],
         "summary": "Get Playlists Overview",
-        "operationId": "get_playlists_overview_playlists_overview_get",
+        "operationId": "get_playlists_overview",
         "parameters": [
           {
             "name": "include_followed",
@@ -684,6 +684,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PlaylistsOverviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -2011,6 +2051,50 @@
             "type": "array",
             "title": "Genres",
             "default": []
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "avg_release_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Release Year"
+          },
+          "avg_bpm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Bpm"
+          },
+          "dominant_mood": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dominant Mood"
           }
         },
         "type": "object",

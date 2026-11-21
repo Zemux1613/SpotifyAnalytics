@@ -89,6 +89,7 @@ class PlaylistService:
         access_token: str,
         user_id: str,
         genres_by_playlist: dict[str, list[PlaylistGenreItem]],
+        metrics_by_playlist: dict[str, dict[str, Any]],
         model_trained: bool,
         include_followed: bool = False,
     ) -> PlaylistsOverviewResponse:
@@ -102,6 +103,7 @@ class PlaylistService:
                 continue
 
             pl_genres = genres_by_playlist.get(pl["id"], [])
+            pl_metrics = metrics_by_playlist.get(pl["id"], {})
             images = pl.get("images") or []
             items.append(
                 PlaylistOverviewItem(
@@ -114,6 +116,10 @@ class PlaylistService:
                     is_owned=is_owned,
                     in_model=len(pl_genres) > 0,
                     genres=pl_genres[:5],
+                    duration_ms=pl_metrics.get("duration_ms"),
+                    avg_release_year=pl_metrics.get("avg_release_year"),
+                    avg_bpm=pl_metrics.get("avg_bpm"),
+                    dominant_mood=pl_metrics.get("dominant_mood"),
                 )
             )
 
