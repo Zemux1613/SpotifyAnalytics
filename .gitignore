@@ -9,4 +9,4 @@ frontend/.angular
 .idea/
 .vscode/
 .opencode/
-frontend/src/openapi
+frontend/src/app/api
