@@ -1,0 +1,159 @@
+<section class="page">
+  <header class="page__head">
+    <div>
+      <h1>Playlists</h1>
+      <p class="muted">
+        {{ filteredItems().length }} von {{ items().length }} Playlists
+      </p>
+    </div>
+
+    <div class="playlists-controls">
+      <div class="segmented" role="group" aria-label="Playlist-Filter">
+        <button
+          type="button"
+          [attr.aria-pressed]="!includeFollowed()"
+          (click)="toggleFollowed(false)"
+        >
+          Eigene
+        </button>
+        <button
+          type="button"
+          [attr.aria-pressed]="includeFollowed()"
+          (click)="toggleFollowed(true)"
+        >
+          Alle (inkl. gefolgte)
+        </button>
+      </div>
+
+      <label class="visually-hidden" for="playlist-sort">Sortierung</label>
+      <select
+        id="playlist-sort"
+        class="sort-select"
+        [ngModel]="sortBy()"
+        (ngModelChange)="sortBy.set($event)"
+      >
+        <option value="default">Standard (Spotify)</option>
+        <option value="tracks_desc">Meiste Songs zuerst</option>
+        <option value="name_asc">Alphabetisch (A–Z)</option>
+        <option value="trained_first">Trainierte Playlists zuerst</option>
+      </select>
+
+      <div class="search-wrap">
+        <label class="visually-hidden" for="playlist-search">Playlists durchsuchen</label>
+        <input
+          id="playlist-search"
+          class="search-input"
+          type="search"
+          placeholder="Name oder Genre filtern…"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="search-clear"
+            aria-label="Filter zurücksetzen"
+            (click)="clearSearch()"
+          >
+            ✕
+          </button>
+        }
+      </div>
+    </div>
+  </header>
+
+  @if (!loading() && !error() && !modelTrained()) {
+    <div class="banner">
+      <div>
+        <strong>Playlist-Modell ist noch nicht trainiert</strong>
+        <p class="muted">
+          Trainiere das Modell auf dem Dashboard, um die Genre-Verteilung deiner Playlists zu sehen.
+        </p>
+      </div>
+      <a class="btn" routerLink="/dashboard">Zum Dashboard</a>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="state">Lade Playlists…</p>
+  } @else if (error()) {
+    <div class="state state--error">
+      <p>{{ error() }}</p>
+      <button type="button" class="btn" (click)="load()">Erneut versuchen</button>
+    </div>
+  } @else if (filteredItems().length === 0) {
+    <p class="state">Keine passenden Playlists gefunden.</p>
+  } @else {
+    <div class="bento">
+      @for (pl of filteredItems(); track pl.id) {
+        <article class="playlist-card">
+          <div class="playlist-card__head">
+            @if (pl.image_url) {
+              <img class="cover-m" [src]="pl.image_url" [alt]="pl.name" loading="lazy" />
+            } @else {
+              <div class="cover-m" aria-hidden="true"></div>
+            }
+
+            <div class="playlist-card__meta">
+              @if (pl.spotify_url) {
+                <a
+                  class="item__title"
+                  [href]="pl.spotify_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ pl.name }}
+                </a>
+              } @else {
+                <span class="item__title">{{ pl.name }}</span>
+              }
+
+              <span class="muted muted--small">
+                {{ pl.tracks_total }} {{ pl.tracks_total === 1 ? 'Song' : 'Songs' }}
+                @if (!pl.is_owned && pl.owner_name) {
+                  · von {{ pl.owner_name }}
+                }
+              </span>
+            </div>
+
+            @if (pl.in_model) {
+              <span class="pill pill--ok">Trainiert</span>
+            } @else {
+              <span class="pill">Nicht im Modell</span>
+            }
+          </div>
+
+          @if ((pl.genres?.length ?? 0) > 0) {
+            <ul class="playlist-card__genres">
+              @for (g of pl.genres; track g.name) {
+                <li class="genre--compact">
+                  <button
+                    type="button"
+                    class="genre-btn"
+                    [class.genre-btn--active]="searchQuery().trim().toLowerCase() === g.name.toLowerCase()"
+                    [title]="'Nach ' + g.name + ' filtern'"
+                    (click)="filterByGenre(g.name)"
+                  >
+                    <div class="genre__meta">
+                      <div class="genre__line">
+                        <span class="genre__name">{{ g.name }}</span>
+                        <span class="muted muted--small">{{ g.share * 100 | number: '1.0-0' }} %</span>
+                      </div>
+                      <div class="genre__bar">
+                        <span [style.width.%]="g.share * 100"></span>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="muted muted--small playlist-card__empty">
+              Noch keine Genre-Daten im Modell.
+            </p>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

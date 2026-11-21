@@ -39,6 +39,7 @@ class TrainedPlaylist:
     estimator: RandomForestClassifier | None
     genre_vector: np.ndarray | None
     top_genres: list[str] = field(default_factory=list)
+    genre_counts: list[tuple[str, int]] = field(default_factory=list)
 
 
 def _artist_objects(
@@ -194,8 +195,22 @@ class PlaylistClassifier:
                     estimator=estimator,
                     genre_vector=genre_vector if norm > 0 else None,
                     top_genres=[genre for genre, _ in genre_profile.most_common(3)],
+                    genre_counts=genre_profile.most_common(5),
                 )
             )
+
+    def playlist_genres(self) -> dict[str, list[dict[str, Any]]]:
+        """Liefert die Top-Genres inkl. Anzahl und Anteil (0..1) pro Playlist-ID."""
+        result: dict[str, list[dict[str, Any]]] = {}
+        for pl in self._trained:
+            if not pl.genre_counts:
+                continue
+            total = sum(count for _, count in pl.genre_counts) or 1
+            result[pl.playlist_id] = [
+                {"name": name, "count": count, "share": count / total}
+                for name, count in pl.genre_counts
+            ]
+        return result
 
     @property
     def _feature_count(self) -> int:

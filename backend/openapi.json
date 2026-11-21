@@ -656,6 +656,51 @@
         }
       }
     },
+    "/playlists/overview": {
+      "get": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Get Playlists Overview",
+        "operationId": "get_playlists_overview_playlists_overview_get",
+        "parameters": [
+          {
+            "name": "include_followed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Auch abonnierte fremde Playlists anzeigen",
+              "default": false,
+              "title": "Include Followed"
+            },
+            "description": "Auch abonnierte fremde Playlists anzeigen"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaylistsOverviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tracks/search": {
       "get": {
         "tags": [
@@ -1888,6 +1933,97 @@
         ],
         "title": "ModelStatusResponse"
       },
+      "PlaylistGenreItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "share": {
+            "type": "number",
+            "title": "Share"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "count",
+          "share"
+        ],
+        "title": "PlaylistGenreItem"
+      },
+      "PlaylistOverviewItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "spotify_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spotify Url"
+          },
+          "tracks_total": {
+            "type": "integer",
+            "title": "Tracks Total"
+          },
+          "owner_name": {
+            "type": "string",
+            "title": "Owner Name"
+          },
+          "is_owned": {
+            "type": "boolean",
+            "title": "Is Owned"
+          },
+          "in_model": {
+            "type": "boolean",
+            "title": "In Model"
+          },
+          "genres": {
+            "items": {
+              "$ref": "#/components/schemas/PlaylistGenreItem"
+            },
+            "type": "array",
+            "title": "Genres",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "tracks_total",
+          "owner_name",
+          "is_owned",
+          "in_model"
+        ],
+        "title": "PlaylistOverviewItem"
+      },
       "PlaylistSuggestion": {
         "properties": {
           "playlist_id": {
@@ -2068,6 +2204,27 @@
           "track_count"
         ],
         "title": "PlaylistSummary"
+      },
+      "PlaylistsOverviewResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlaylistOverviewItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "model_trained": {
+            "type": "boolean",
+            "title": "Model Trained"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "model_trained"
+        ],
+        "title": "PlaylistsOverviewResponse"
       },
       "SpotifyAlbum": {
         "properties": {

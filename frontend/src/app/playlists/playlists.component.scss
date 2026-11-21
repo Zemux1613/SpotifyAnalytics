@@ -1,0 +1,368 @@
+.card--4 {
+  grid-column: span 4;
+}
+@media (max-width: 960px) {
+  .card--4 { grid-column: span 6; }
+}
+@media (max-width: 600px) {
+  .card--4 { grid-column: span 12; }
+}
+
+.playlists-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.search-input {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  min-width: 15rem;
+
+  &::placeholder { color: var(--muted); }
+  &:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+}
+
+.banner {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.playlist-card {
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.playlist-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.cover-m {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  object-fit: cover;
+}
+
+.playlist-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.playlist-card__genres {
+  width: 100%;
+}
+
+.genre--compact {
+  padding: 0.35rem 0;
+  border-bottom: 0;
+}
+
+.playlist-card__empty {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+// ---------- Controls im Header ----------
+.playlists-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.search-input {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  min-width: 15rem;
+
+  &::placeholder {
+    color: var(--muted);
+  }
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, var(--surface)), var(--surface) 65%);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: var(--radius-m);
+}
+
+// ---------- Bento-Grid (3 Spalten auf Desktop) ----------
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.playlist-card {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.15rem;
+  min-width: 0;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  transition: border-color 0.15s, transform 0.15s;
+
+  &:hover {
+    border-color: var(--rank-dim);
+  }
+}
+
+@media (max-width: 960px) {
+  .playlist-card {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 600px) {
+  .playlist-card {
+    grid-column: 1 / -1;
+  }
+}
+
+// ---------- Card-Header (Cover, Titel, Badge) ----------
+.playlist-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.cover-m {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.playlist-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.item__title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  &:hover {
+    text-decoration: underline;
+    color: var(--accent);
+  }
+}
+
+.pill {
+  flex: none;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pill--ok {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+// ---------- Genre-Balken ----------
+.playlist-card__genres {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.genre--compact {
+  list-style: none;
+}
+
+.genre__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.genre__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.genre__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.genre__bar {
+  width: 100%;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+  }
+}
+
+.playlist-card__empty {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  font-style: italic;
+}
+
+.sort-select {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--muted);
+  }
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+}
+
+.search-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-input {
+  padding: 0.5rem 2rem 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  min-width: 15rem;
+
+  &::placeholder {
+    color: var(--muted);
+  }
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+}
+
+.search-clear {
+  position: absolute;
+  right: 0.45rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: var(--radius-s);
+
+  &:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+}
+
+// Klickbare Genre-Zeilen in den Cards
+.genre-btn {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0.4rem;
+  margin: 0 -0.4rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+.genre-btn--active {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+
+  .genre__name {
+    color: var(--accent);
+  }
+}

@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from app.clients.spotify_client import SpotifyClient
+from app.api.schemas import PlaylistGenreItem, PlaylistOverviewItem, PlaylistsOverviewResponse
 
 logger = logging.getLogger(__name__)
 
@@ -81,4 +82,42 @@ class PlaylistService:
             f"/playlists/{playlist_id}/tracks",
             access_token,
             {"uris": [track_uri]},
+        )
+
+    def get_playlists_overview(
+        self,
+        access_token: str,
+        user_id: str,
+        genres_by_playlist: dict[str, list[PlaylistGenreItem]],
+        model_trained: bool,
+        include_followed: bool = False,
+    ) -> PlaylistsOverviewResponse:
+        raw_playlists = self.list_playlists(access_token)
+
+        items: list[PlaylistOverviewItem] = []
+        for pl in raw_playlists:
+            owner_id = pl.get("owner", {}).get("id", "")
+            is_owned = owner_id == user_id
+            if not include_followed and not is_owned:
+                continue
+
+            pl_genres = genres_by_playlist.get(pl["id"], [])
+            images = pl.get("images") or []
+            items.append(
+                PlaylistOverviewItem(
+                    id=pl["id"],
+                    name=pl["name"],
+                    image_url=images[0]["url"] if images else None,
+                    spotify_url=pl.get("external_urls", {}).get("spotify"),
+                    tracks_total=pl.get("tracks", {}).get("total", 0),
+                    owner_name=pl.get("owner", {}).get("display_name") or owner_id,
+                    is_owned=is_owned,
+                    in_model=len(pl_genres) > 0,
+                    genres=pl_genres[:5],
+                )
+            )
+
+        return PlaylistsOverviewResponse(
+            items=items,
+            model_trained=model_trained,
         )

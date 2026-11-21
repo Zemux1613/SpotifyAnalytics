@@ -257,3 +257,23 @@ class ListeningInsightsResponse(ApiModel):
     discovery: DiscoveryStats
     streak: ListeningStreak
     daily: list[ListeningDay] = Field(default_factory=list)  # letzte 14 Tage, älteste zuerst
+
+class PlaylistGenreItem(BaseModel):
+    name: str
+    count: int
+    share: float  # 0.0 bis 1.0 (für Balkenbreite & Prozentanzeige)
+
+class PlaylistOverviewItem(BaseModel):
+    id: str
+    name: str
+    image_url: str | None = None
+    spotify_url: str | None = None
+    tracks_total: int
+    owner_name: str
+    is_owned: bool
+    in_model: bool
+    genres: list[PlaylistGenreItem] = []
+
+class PlaylistsOverviewResponse(BaseModel):
+    items: list[PlaylistOverviewItem]
+    model_trained: bool

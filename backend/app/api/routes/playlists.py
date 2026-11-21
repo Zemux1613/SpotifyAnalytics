@@ -1,18 +1,20 @@
 from typing import Any
+from fastapi import APIRouter, Depends, Query
+from app.services.playlist_service import PlaylistService
 
-from fastapi import APIRouter
 from app.api.schemas import (
     API_ERROR_RESPONSES,
     AddTrackRequest,
     AddTrackResponse,
     ModelStatusResponse,
     PlaylistSummary,
+    PlaylistsOverviewResponse
 )
 from app.api.deps import (
     AccessTokenDep,
     PlaylistServiceDep,
     RecommenderServiceDep,
-    SessionIdDep,
+    SessionIdDep
 )
 
 router = APIRouter(prefix="/playlists", tags=["playlists"])
@@ -99,3 +101,25 @@ def _pick_image(images: list[dict[str, Any]] | None, target: int = 64) -> str | 
     if not with_url:
         return None
     return min(with_url, key=lambda image: abs(int(image.get("width") or 0) - target))["url"]
+
+@router.get(
+    "/overview",
+    response_model=PlaylistsOverviewResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_playlists_overview",
+)
+def get_playlists_overview(
+    playlists: PlaylistServiceDep,
+    recommender: RecommenderServiceDep,
+    token: AccessTokenDep,
+    session_id: SessionIdDep,
+    include_followed: bool = Query(default=False, description="Auch abonnierte fremde Playlists anzeigen"),
+) -> PlaylistsOverviewResponse:
+    user_id, genres_by_playlist, model_trained = recommender.get_playlist_genre_overview(token, session_id)
+    return playlists.get_playlists_overview(
+        access_token=token,
+        user_id=user_id,
+        genres_by_playlist=genres_by_playlist,
+        model_trained=model_trained,
+        include_followed=include_followed,
+    )

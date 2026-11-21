@@ -193,3 +193,26 @@ class RecommenderService:
         owner = (playlist.get("owner") or {}).get("id")
         # ohne bekannte user-id lieber alles behalten und Spotify entscheiden lassen
         return user_id is None or owner == user_id
+
+    def train_model(self, access_token: str, session_id: str | None) -> dict[str, Any]:
+        """Trainiert das Modell neu (wie refresh=true bei den Vorschlägen)."""
+        self._get_model(access_token, session_id, refresh=True)
+        return self.get_model_status(access_token, session_id)
+
+    def get_playlist_genre_overview(
+        self, access_token: str, 
+        session_id: str | None
+    ) -> tuple[str, dict[str, list[dict[str, Any]]], bool]:
+        """Liefert (user_id, genres_by_playlist, model_trained) aus dem gecachten Modell."""
+        profile = self._client.get("/me", access_token)
+        user_id = profile.get("id") or ""
+
+        key = self._cache_key(access_token, session_id)
+        with self._cache_lock:
+            entry = self._cache.get(key)
+        age = time.monotonic() - entry[0] if entry else None
+
+        if entry is None or age >= CACHE_TTL:
+            return user_id, {}, False
+
+        return user_id, entry[1].playlist_genres(), True

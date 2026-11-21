@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/auth.guard';
+import { PlaylistsComponent } from './playlists/playlists.component';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./search/search.component').then((m) => m.SearchComponent),
   },
+  { path: 'playlists', component: PlaylistsComponent, canActivate: [authGuard] },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },
 ];
