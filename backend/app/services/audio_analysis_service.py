@@ -8,6 +8,7 @@ Redis/eine Datenbank und die Tasks durch eine Queue ersetzt werden.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 import io
 import logging
 import subprocess
