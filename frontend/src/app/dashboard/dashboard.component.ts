@@ -31,7 +31,7 @@ export class DashboardComponent {
   private subscription?: Subscription;
 
   protected readonly ranges = RANGES;
-  protected readonly range = signal<TimeRangeDto>('medium_term' as TimeRangeDto);
+  protected readonly range = signal<TimeRangeDto>('short_term' as TimeRangeDto);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
@@ -86,16 +86,45 @@ export class DashboardComponent {
     const reference = REFERENCE[range];
 
     this.subscription = forkJoin({
-      tracks: this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 50, offset: 0, timeRange: range }),
-      artists: this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 50, offset: 0, timeRange: range }),
-      referenceTracks: reference ? this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 50, offset: 0, timeRange: reference }) : of(null),
-      referenceArtists: reference ? this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 50, offset: 0, timeRange: reference }) : of(null),
+      tracks: this.api.getTopMeTopItemTypeGet({
+        itemType: 'tracks' as TopItemTypeDto,
+        limit: 50,
+        offset: 0,
+        timeRange: range,
+      }),
+      artists: this.api.getTopMeTopItemTypeGet({
+        itemType: 'artists' as TopItemTypeDto,
+        limit: 50,
+        offset: 0,
+        timeRange: range,
+      }),
+      referenceTracks: reference
+        ? this.api.getTopMeTopItemTypeGet({
+            itemType: 'tracks' as TopItemTypeDto,
+            limit: 50,
+            offset: 0,
+            timeRange: reference,
+          })
+        : of(null),
+      referenceArtists: reference
+        ? this.api.getTopMeTopItemTypeGet({
+            itemType: 'artists' as TopItemTypeDto,
+            limit: 50,
+            offset: 0,
+            timeRange: reference,
+          })
+        : of(null),
     }).subscribe({
       next: ({ tracks, artists, referenceTracks, referenceArtists }) => {
-        this.current.set(computeStats((tracks as TrackPagingDto).items, (artists as ArtistPagingDto).items));
+        this.current.set(
+          computeStats((tracks as TrackPagingDto).items, (artists as ArtistPagingDto).items),
+        );
         this.baseline.set(
           referenceTracks && referenceArtists
-            ? computeStats((referenceTracks as TrackPagingDto).items, (referenceArtists as ArtistPagingDto).items)
+            ? computeStats(
+                (referenceTracks as TrackPagingDto).items,
+                (referenceArtists as ArtistPagingDto).items,
+              )
             : null,
         );
         this.loading.set(false);

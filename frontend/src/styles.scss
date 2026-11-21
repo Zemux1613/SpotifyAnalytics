@@ -354,3 +354,21 @@ a.item__title:hover { text-decoration: underline; }
 .audio-analysis__metrics dd { font-weight: 700; font-variant-numeric: tabular-nums; }
 .audio-analysis__note { margin-top: 0.75rem; }
 @media (max-width: 640px) { .audio-analysis__content { grid-template-columns: 1fr; } .audio-analysis__chart svg { margin: 0 auto; } }
+
+
+// ---------- Eigenständige Audio-Analyse ----------
+.audio-page__head { margin-bottom: 1.25rem; }
+.audio-page__eyebrow { color: var(--accent); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
+.audio-page__intro { margin-top: 0.65rem; max-width: 42rem; }
+.audio-search { max-width: 760px; margin-bottom: 1.5rem; }
+.audio-workspace { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); align-items: start; gap: 1.5rem; }
+.audio-picker { min-width: 0; padding: 1.25rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-m); }
+.audio-picker h2 { margin-bottom: 0.2rem; }
+.audio-picker__hint { margin-bottom: 0.8rem; }
+.audio-result { min-width: 0; }
+.audio-empty { display: grid; justify-items: center; gap: 0.65rem; max-width: 34rem; margin: 3rem auto; padding: 2rem; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-m); }
+.audio-empty__icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; margin-bottom: 0.4rem; border-radius: 50%; background: var(--surface-2); color: var(--accent); font-size: 2rem; }
+.audio-empty p { max-width: 30rem; }
+.audio-disclaimer { max-width: 75ch; margin-top: 1.5rem; color: var(--muted); font-size: 0.8rem; }
+@media (max-width: 850px) { .audio-workspace { grid-template-columns: 1fr; } .audio-picker { order: 2; } .audio-result { order: 1; } }
+@media (max-width: 640px) { .audio-search { flex-direction: column; } .audio-search .btn { width: 100%; } }

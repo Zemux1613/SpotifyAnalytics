@@ -3,3 +3,4 @@ uvicorn[standard]
 requests
 numpy
 scikit-learn
+librosa>=0.10.2,<0.12

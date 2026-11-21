@@ -8,6 +8,7 @@ from fastapi import Cookie, Depends
 from app.clients.spotify_client import SpotifyClient
 from app.config import Settings, get_settings
 from app.services.auth_service import AuthService
+from app.services.audio_analysis_service import AudioAnalysisService
 from app.services.playlist_service import PlaylistService
 from app.services.recommender_service import RecommenderService
 from app.services.stats_service import StatsService
@@ -36,6 +37,11 @@ def get_stats_service() -> StatsService:
 @lru_cache
 def get_user_service() -> UserService:
     return UserService(get_spotify_client())
+
+
+@lru_cache
+def get_audio_analysis_service() -> AudioAnalysisService:
+    return AudioAnalysisService()
 
 
 @lru_cache
@@ -73,6 +79,7 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 TrackServiceDep = Annotated[TrackService, Depends(get_track_service)]
+AudioAnalysisServiceDep = Annotated[AudioAnalysisService, Depends(get_audio_analysis_service)]
 PlaylistServiceDep = Annotated[PlaylistService, Depends(get_playlist_service)]
 RecommenderServiceDep = Annotated[RecommenderService, Depends(get_recommender_service)]
 SessionIdDep = Annotated[str | None, Depends(get_session_id)]

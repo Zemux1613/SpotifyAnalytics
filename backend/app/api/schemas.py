@@ -61,7 +61,7 @@ class SpotifyAlbum(ApiModel):
     album_type: str
     total_tracks: int
     release_date: str
-    release_date_precision: str
+    release_date_precision: Literal["year", "month", "day"]
     images: list[SpotifyImage] = Field(default_factory=list)
     artists: list[ArtistRef] = Field(default_factory=list)
     external_urls: ExternalUrls | None = None
@@ -73,6 +73,7 @@ class SpotifyTrack(ApiModel):
     uri: str
     duration_ms: int
     popularity: int
+    preview_url: str | None = None
     explicit: bool
     track_number: int
     disc_number: int
@@ -106,6 +107,30 @@ class TrackSearchResponse(ApiModel):
 class TrackDetailsResponse(ApiModel):
     track: SpotifyTrack
     artists: list[SpotifyArtist]
+
+
+class AudioRadarValues(ApiModel):
+    tempo: float = Field(ge=0, le=100)
+    brightness: float = Field(ge=0, le=100)
+    rhythm: float = Field(ge=0, le=100)
+    texture: float = Field(ge=0, le=100)
+
+
+class AudioFeatures(ApiModel):
+    tempo_bpm: float = Field(ge=0)
+    spectral_centroid_hz: float = Field(ge=0)
+    zero_crossing_rate: float = Field(ge=0, le=1)
+    mfcc: list[float]
+    radar: AudioRadarValues
+    mood: Literal["Workout", "Deep Focus", "Melancholisch"]
+    clustering_method: Literal["heuristic", "kmeans"]
+
+
+class AudioAnalysisResponse(ApiModel):
+    track_id: str
+    status: Literal["queued", "processing", "completed", "failed", "unavailable"]
+    features: AudioFeatures | None = None
+    message: str | None = None
 
 
 class UserProfile(ApiModel):

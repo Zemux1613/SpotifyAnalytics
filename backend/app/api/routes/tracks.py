@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, BackgroundTasks, Query
 
 from app.api.schemas import (
     API_ERROR_RESPONSES,
+    AudioAnalysisResponse,
     PlaylistSuggestionsResponse,
     TrackDetailsResponse,
     TrackSearchResponse,
 )
 from app.api.deps import (
     AccessTokenDep,
+    AudioAnalysisServiceDep,
     RecommenderServiceDep,
     SessionIdDep,
     TrackServiceDep,
@@ -68,3 +70,36 @@ def get_track(
     track_id: str, tracks: TrackServiceDep, token: AccessTokenDep
 ) -> TrackDetailsResponse:
     return tracks.get_details(token, track_id)
+
+
+@router.post(
+    "/{track_id}/audio-analysis",
+    response_model=AudioAnalysisResponse,
+    status_code=202,
+    responses=API_ERROR_RESPONSES,
+    operation_id="start_track_audio_analysis",
+)
+def start_track_audio_analysis(
+    track_id: str,
+    background_tasks: BackgroundTasks,
+    tracks: TrackServiceDep,
+    analysis: AudioAnalysisServiceDep,
+    token: AccessTokenDep,
+) -> AudioAnalysisResponse:
+    """Startet die Audio-Analyse eines Spotify-Preview-Snippets."""
+    details = tracks.get_details(token, track_id)
+    preview_url = details["track"].get("preview_url")
+    return analysis.enqueue(track_id, preview_url, background_tasks)
+
+
+@router.get(
+    "/{track_id}/audio-analysis",
+    response_model=AudioAnalysisResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_track_audio_analysis",
+)
+def get_track_audio_analysis(
+    track_id: str, analysis: AudioAnalysisServiceDep, token: AccessTokenDep
+) -> AudioAnalysisResponse:
+    """Liefert den aktuellen Status oder das Ergebnis der Audio-Analyse."""
+    return analysis.get_status(track_id)

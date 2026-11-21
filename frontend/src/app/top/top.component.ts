@@ -14,9 +14,9 @@ const RANGES: { value: TimeRangeDto; label: string }[] = [
 @Component({
   selector: 'app-top-page',
   imports: [DurationPipe],
-  templateUrl: './top.page.html',
+  templateUrl: './top.component.html',
 })
-export class TopPage {
+export class TopComponent {
   private readonly api = inject(MeApi);
   private subscription?: Subscription;
 
@@ -45,8 +45,8 @@ export class TopPage {
     this.error.set(null);
 
     this.subscription = forkJoin({
-      artists: this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 10, offset: 0, timeRange: this.range() }),
-      tracks: this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 10, offset: 0, timeRange: this.range() }),
+      artists: this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 25, offset: 0, timeRange: this.range() }),
+      tracks: this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 25, offset: 0, timeRange: this.range() }),
     }).subscribe({
       next: ({ artists, tracks }) => {
         this.artists.set((artists as ArtistPagingDto).items);
