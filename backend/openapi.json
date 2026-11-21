@@ -689,6 +689,170 @@
           }
         }
       }
+    },
+    "/tracks/{track_id}/audio-analysis": {
+      "post": {
+        "tags": [
+          "tracks"
+        ],
+        "summary": "Start Track Audio Analysis",
+        "description": "Startet die Audio-Analyse eines Spotify-Preview-Snippets.",
+        "operationId": "start_track_audio_analysis",
+        "parameters": [
+          {
+            "name": "track_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Track Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AudioAnalysisResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "tracks"
+        ],
+        "summary": "Get Track Audio Analysis",
+        "description": "Liefert den aktuellen Status oder das Ergebnis der Audio-Analyse.",
+        "operationId": "get_track_audio_analysis",
+        "parameters": [
+          {
+            "name": "track_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Track Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AudioAnalysisResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -818,6 +982,146 @@
           "uri"
         ],
         "title": "ArtistRef"
+      },
+      "AudioAnalysisResponse": {
+        "properties": {
+          "track_id": {
+            "type": "string",
+            "title": "Track Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "processing",
+              "completed",
+              "failed",
+              "unavailable"
+            ],
+            "title": "Status"
+          },
+          "features": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AudioFeatures"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "track_id",
+          "status"
+        ],
+        "title": "AudioAnalysisResponse"
+      },
+      "AudioFeatures": {
+        "properties": {
+          "tempo_bpm": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Tempo Bpm"
+          },
+          "spectral_centroid_hz": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Spectral Centroid Hz"
+          },
+          "zero_crossing_rate": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Zero Crossing Rate"
+          },
+          "mfcc": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Mfcc"
+          },
+          "radar": {
+            "$ref": "#/components/schemas/AudioRadarValues"
+          },
+          "mood": {
+            "type": "string",
+            "enum": [
+              "Workout",
+              "Deep Focus",
+              "Melancholisch"
+            ],
+            "title": "Mood"
+          },
+          "clustering_method": {
+            "type": "string",
+            "enum": [
+              "heuristic",
+              "kmeans"
+            ],
+            "title": "Clustering Method"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tempo_bpm",
+          "spectral_centroid_hz",
+          "zero_crossing_rate",
+          "mfcc",
+          "radar",
+          "mood",
+          "clustering_method"
+        ],
+        "title": "AudioFeatures"
+      },
+      "AudioRadarValues": {
+        "properties": {
+          "tempo": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Tempo"
+          },
+          "brightness": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Brightness"
+          },
+          "rhythm": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Rhythm"
+          },
+          "texture": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Texture"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tempo",
+          "brightness",
+          "rhythm",
+          "texture"
+        ],
+        "title": "AudioRadarValues"
       },
       "ErrorResponse": {
         "properties": {
@@ -1139,6 +1443,11 @@
           },
           "release_date_precision": {
             "type": "string",
+            "enum": [
+              "year",
+              "month",
+              "day"
+            ],
             "title": "Release Date Precision"
           },
           "images": {
@@ -1297,6 +1606,17 @@
           "popularity": {
             "type": "integer",
             "title": "Popularity"
+          },
+          "preview_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview Url"
           },
           "explicit": {
             "type": "boolean",

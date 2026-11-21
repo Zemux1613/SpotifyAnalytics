@@ -14,7 +14,7 @@ const RANGES: { value: TimeRangeDto; label: string }[] = [
  * Spotify liefert keine echten Stream-Zahlen oder Hörhistorien.
  * Deshalb vergleichen wir den gewählten Zeitraum mit einem Referenzzeitraum.
  */
-const REFERENCE: Record<TimeRangeDto, TimeRangeDto | null> = {
+const REFERENCE: Partial<Record<TimeRangeDto, TimeRangeDto>> = {
   ['short_term' as TimeRangeDto]: 'medium_term' as TimeRangeDto,
   ['medium_term' as TimeRangeDto]: 'long_term' as TimeRangeDto,
   ['long_term' as TimeRangeDto]: 'medium_term' as TimeRangeDto,
@@ -86,10 +86,10 @@ export class DashboardComponent {
     const reference = REFERENCE[range];
 
     this.subscription = forkJoin({
-      tracks: this.api.getTopMeTopItemTypeGet('tracks' as TopItemTypeDto, 50, 0, range),
-      artists: this.api.getTopMeTopItemTypeGet('artists' as TopItemTypeDto, 50, 0, range),
-      referenceTracks: reference ? this.api.getTopMeTopItemTypeGet('tracks' as TopItemTypeDto, 50, 0, reference) : of(null),
-      referenceArtists: reference ? this.api.getTopMeTopItemTypeGet('artists' as TopItemTypeDto, 50, 0, reference) : of(null),
+      tracks: this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 50, offset: 0, timeRange: range }),
+      artists: this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 50, offset: 0, timeRange: range }),
+      referenceTracks: reference ? this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 50, offset: 0, timeRange: reference }) : of(null),
+      referenceArtists: reference ? this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 50, offset: 0, timeRange: reference }) : of(null),
     }).subscribe({
       next: ({ tracks, artists, referenceTracks, referenceArtists }) => {
         this.current.set(computeStats((tracks as TrackPagingDto).items, (artists as ArtistPagingDto).items));
@@ -151,7 +151,7 @@ function computeStats(tracks: SpotifyTrackDto[], artists: SpotifyArtistDto[]): D
   const songIds = new Set(tracks.map((track) => track.id));
   const artistIds = new Set<string>();
   for (const track of tracks) {
-    for (const artist of track.artists) {
+    for (const artist of track.artists ?? []) {
       artistIds.add(artist.id);
     }
   }

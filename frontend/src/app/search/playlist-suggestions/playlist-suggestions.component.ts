@@ -46,7 +46,10 @@ export class PlaylistSuggestionsComponent {
     this.addingId.set(suggestion.playlist_id);
     this.clearAddError(suggestion.playlist_id);
 
-    this.addSub = this.playlistsApi.addTrackToPlaylistPlaylistsPlaylistIdTracksPost(suggestion.playlist_id, { track_uri: this.track().uri }).subscribe({
+    this.addSub = this.playlistsApi.addTrackToPlaylistPlaylistsPlaylistIdTracksPost({
+      playlistId: suggestion.playlist_id,
+      addTrackRequestDto: { track_uri: this.track().uri },
+    }).subscribe({
       next: () => {
         this.addedIds.set(new Set([...this.addedIds(), suggestion.playlist_id]));
         this.addingId.set(null);
@@ -79,7 +82,7 @@ export class PlaylistSuggestionsComponent {
     this.addErrors.set({});
     this.addingId.set(null);
 
-    this.suggestionsSub = this.tracksApi.playlistSuggestionsTracksTrackIdPlaylistSuggestionsGet(trackId, refresh).subscribe({
+    this.suggestionsSub = this.tracksApi.playlistSuggestionsTracksTrackIdPlaylistSuggestionsGet({ trackId, refresh }).subscribe({
       next: (response) => {
         this.response.set(response);
         this.loading.set(false);

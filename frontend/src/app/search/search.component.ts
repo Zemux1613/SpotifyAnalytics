@@ -58,7 +58,7 @@ export class SearchComponent {
     this.detailsError.set(null);
     this.loadingDetails.set(false);
 
-    this.searchSub = this.api.searchTracksTracksSearchGet(query, 10).subscribe({
+    this.searchSub = this.api.searchTracksTracksSearchGet({ q: query, limit: 10 }).subscribe({
       next: (response) => {
         const items = response.tracks.items.filter((track) => !!track);
         this.results.set(items);
@@ -81,7 +81,7 @@ export class SearchComponent {
     this.detailsError.set(null);
     this.loadingDetails.set(true);
 
-    this.detailsSub = this.api.getTrackTracksTrackIdGet(track.id).subscribe({
+    this.detailsSub = this.api.getTrackTracksTrackIdGet({ trackId: track.id }).subscribe({
       next: (details) => {
         this.details.set(details);
         this.loadingDetails.set(false);
@@ -94,6 +94,6 @@ export class SearchComponent {
   }
 
   protected artistNames(track: SpotifyTrackDto): string {
-    return track.artists.map((a) => a.name).join(', ');
+    return (track.artists ?? []).map((a) => a.name).join(', ');
   }
 }

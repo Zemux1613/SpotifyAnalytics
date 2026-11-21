@@ -1,3 +1,5 @@
+import { SpotifyAlbumDtoReleaseDatePrecisionEnum } from '../api/generated';
+
 export function formatDuration(ms: number | null | undefined): string {
   if (ms == null) {
     return '';
@@ -14,7 +16,7 @@ const MONTHS = [
 ];
 
 /** Spotify liefert je nach Genauigkeit "2013", "2013-05" oder "2013-05-17". */
-export function formatReleaseDate(date: string, precision: 'year' | 'month' | 'day'): string {
+export function formatReleaseDate(date: string, precision: SpotifyAlbumDtoReleaseDatePrecisionEnum): string {
   const [year, month, day] = date.split('-');
   const monthName = MONTHS[Number(month) - 1];
   if (precision === 'day' && monthName && day) {

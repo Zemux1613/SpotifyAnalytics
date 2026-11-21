@@ -45,8 +45,8 @@ export class TopPage {
     this.error.set(null);
 
     this.subscription = forkJoin({
-      artists: this.api.getTopMeTopItemTypeGet('artists' as TopItemTypeDto, 10, 0, this.range()),
-      tracks: this.api.getTopMeTopItemTypeGet('tracks' as TopItemTypeDto, 10, 0, this.range()),
+      artists: this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 10, offset: 0, timeRange: this.range() }),
+      tracks: this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 10, offset: 0, timeRange: this.range() }),
     }).subscribe({
       next: ({ artists, tracks }) => {
         this.artists.set((artists as ArtistPagingDto).items);
@@ -67,6 +67,6 @@ export class TopPage {
   }
 
   protected artistNames(track: SpotifyTrackDto): string {
-    return track.artists.map((a) => a.name).join(', ');
+    return (track.artists ?? []).map((a) => a.name).join(', ');
   }
 }

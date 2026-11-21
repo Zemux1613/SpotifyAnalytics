@@ -27,6 +27,51 @@
     }
   </dl>
 
+  <section class="audio-analysis details__section" aria-labelledby="audio-analysis-title">
+    <div class="audio-analysis__head">
+      <div>
+        <h3 id="audio-analysis-title">Audio-Mood &amp; Tempo</h3>
+        <p class="muted">Analyse des Spotify-Preview-Snippets</p>
+      </div>
+      @if (audioAnalysis()?.features; as features) {
+        <span class="audio-analysis__mood">{{ features.mood }}</span>
+      }
+    </div>
+
+    @if (audioLoading()) {
+      <p class="state">Preview wird analysiert …</p>
+    } @else if (audioError()) {
+      <p class="state state--error">{{ audioError() }}</p>
+    } @else if (audioAnalysis()?.status === 'unavailable') {
+      <p class="state">{{ audioAnalysis()?.message }}</p>
+    } @else if (audioAnalysis()?.status === 'failed') {
+      <p class="state state--error">{{ audioAnalysis()?.message }}</p>
+    } @else if (audioAnalysis()?.features; as features) {
+      <div class="audio-analysis__content">
+        <div class="audio-analysis__chart">
+          <svg viewBox="0 0 240 240" role="img" aria-label="Radar-Chart der Audio-Merkmale">
+            <polygon class="radar-grid" points="120,45 195,120 120,195 45,120" />
+            <polygon class="radar-grid" points="120,82.5 157.5,120 120,157.5 82.5,120" />
+            <line class="radar-axis" x1="120" y1="45" x2="120" y2="195" />
+            <line class="radar-axis" x1="45" y1="120" x2="195" y2="120" />
+            <polygon class="radar-value" [attr.points]="radarPoints()" />
+            <text x="120" y="27" text-anchor="middle">Tempo</text>
+            <text x="207" y="123">Helligkeit</text>
+            <text x="120" y="215" text-anchor="middle">Rhythmus</text>
+            <text x="7" y="123">Textur</text>
+          </svg>
+        </div>
+        <dl class="audio-analysis__metrics">
+          <div><dt>Tempo</dt><dd>{{ features.tempo_bpm | number:'1.0-0' }} BPM</dd></div>
+          <div><dt>Spectral Centroid</dt><dd>{{ features.spectral_centroid_hz | number:'1.0-0' }} Hz</dd></div>
+          <div><dt>Zero-Crossing-Rate</dt><dd>{{ features.zero_crossing_rate | number:'1.3-3' }}</dd></div>
+          <div><dt>Analyse</dt><dd>{{ features.clustering_method === 'kmeans' ? 'K-Means' : 'Heuristik' }}</dd></div>
+        </dl>
+      </div>
+      <p class="muted audio-analysis__note">Die Mood-Zuordnung ist eine Näherung anhand der extrahierten Audio-Merkmale. MFCCs werden zusätzlich für die Klangtextur berücksichtigt.</p>
+    }
+  </section>
+
   @if (data().artists.length) {
     <section class="details__section">
       <h3>{{ data().artists.length === 1 ? 'Künstler' : 'Künstler:innen' }}</h3>

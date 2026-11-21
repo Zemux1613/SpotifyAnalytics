@@ -34,8 +34,8 @@
                 <span class="match__name">{{ suggestion.name }}</span>
                 <span class="muted muted--small">
                   {{ count(suggestion.track_count) }} Songs
-                  @if (suggestion.top_genres.length) {
-                    · {{ suggestion.top_genres.join(', ') }}
+                  @if (suggestion.top_genres?.length) {
+                    · {{ suggestion.top_genres?.join(', ') }}
                   }
                 </span>
               </div>
