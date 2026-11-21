@@ -21,12 +21,6 @@ export const routes: Routes = [
     loadComponent: () => import('./top/top.component').then((m) => m.TopComponent),
   },
   {
-    path: 'audio-analysis',
-    title: 'Audio-Analyse | SpotifyAnalytics',
-    canActivate: [authGuard],
-    loadComponent: () => import('./audio-analysis/audio-analysis.component').then((m) => m.AudioAnalysisComponent),
-  },
-  {
     path: 'search',
     title: 'Song suchen | SpotifyAnalytics',
     canActivate: [authGuard],

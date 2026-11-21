@@ -1,0 +1,18 @@
+.login { display: grid; align-content: center; justify-items: start; gap: 1.5rem; min-height: 100dvh; max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem; }
+.login h1 { font-size: clamp(2.75rem, 8vw, 5rem); line-height: 1; letter-spacing: -0.05em; }
+.login p { max-width: 34rem; font-size: 1.15rem; color: var(--muted); }
+.login .state { padding: 0; }
+
+@media (max-width: 640px) {
+  .topbar__inner { flex-wrap: wrap; gap: 0.75rem 1.25rem; }
+  .nav { order: 3; flex-basis: 100%; }
+  .user { margin-left: auto; }
+  .user__name { display: none; }
+  .rank { width: 2rem; font-size: 1.6rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+
+.page > h1 { margin-bottom: 1.5rem; }

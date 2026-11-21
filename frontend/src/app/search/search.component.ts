@@ -10,6 +10,7 @@ import { TrackDetailsComponent } from './track-details/track-details.component';
   selector: 'app-search-page',
   imports: [TrackDetailsComponent, PlaylistSuggestionsComponent],
   templateUrl: './search.component.html',
+  styleUrl: './search.component.scss'
 })
 export class SearchComponent {
   private readonly api = inject(TracksApi);

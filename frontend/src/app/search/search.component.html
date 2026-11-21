@@ -50,8 +50,10 @@
           } @else if (loadingDetails()) {
             <p class="state">Details werden geladen …</p>
           } @else if (details(); as d) {
-            <app-track-details [data]="d" />
-            <app-playlist-suggestions [track]="d.track" />
+            <div class="track-layout">
+                <app-track-details class="details-left" [data]="d" />
+                <app-playlist-suggestions class="suggestions-right" [track]="d.track" />
+            </div>
           }
         </div>
       </div>

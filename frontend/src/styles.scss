@@ -285,31 +285,6 @@ app-sparkline { display: block; margin-top: auto; width: 100%; }
 
 .note { margin-top: 1.5rem; max-width: 62ch; }
 
-// ---------- Suche ----------
-.search-form { display: flex; gap: 0.75rem; margin-bottom: 2rem; max-width: 640px; }
-.search-form input {
-  flex: 1; min-width: 0; padding: 0.7rem 0.9rem;
-  border: 1px solid var(--line); border-radius: var(--radius-s);
-  background: var(--surface); color: var(--text); font: inherit;
-}
-.search-form input::placeholder { color: var(--muted); }
-.search-form input:focus-visible { outline-offset: 0; border-color: var(--accent); }
-
-.search-layout { display: grid; gap: 2rem; grid-template-columns: 1fr; align-items: start; }
-@media (min-width: 900px) { .search-layout { grid-template-columns: 340px 1fr; } }
-.search-layout__details { min-width: 0; }
-@media (min-width: 900px) { .search-layout__details { align-self: start; } }
-
-.results { display: flex; flex-direction: column; gap: 0.25rem; }
-.result {
-  display: flex; align-items: center; gap: 0.8rem; width: 100%;
-  padding: 0.6rem 0.7rem; border: 0; border-left: 3px solid transparent; border-radius: var(--radius-s);
-  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
-}
-.result:hover { background: var(--surface); }
-.result[aria-current='true'] { background: var(--surface-2); border-left-color: var(--accent); }
-.result .cover-s { width: 48px; height: 48px; }
-
 // ---------- Song-Details ----------
 .details { background: var(--surface); border-radius: var(--radius-m); padding: 1.5rem; }
 .details__head { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
@@ -328,97 +303,6 @@ app-sparkline { display: block; margin-top: auto; width: 100%; }
 .details__section { margin-top: 1.5rem; }
 .details__section h3 { margin-bottom: 0.5rem; }
 .artist-rows .avatar { width: 48px; height: 48px; }
-
-// ---------- Playlist-Vorschläge ----------
-.matches {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-m);
-}
-.matches__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-.matches__head h3 { margin: 0; }
-.matches__list { display: flex; flex-direction: column; }
-.match { padding: 0.9rem 0; border-top: 1px solid var(--line); }
-.match:first-child { padding-top: 0; border-top: 0; }
-.match__row { display: flex; align-items: center; gap: 0.75rem; }
-.match__cover {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-s);
-  object-fit: cover;
-  background: var(--surface-2);
-}
-.match__text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.match__name { font-weight: 700; overflow-wrap: anywhere; }
-.match__percent {
-  flex: none;
-  color: var(--accent);
-  font-size: 1.15rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-.match__bar {
-  height: 4px;
-  margin: 0.6rem 0;
-  border-radius: 2px;
-  background: var(--surface-2);
-  overflow: hidden;
-}
-.match__bar span { display: block; height: 100%; background: var(--accent); }
-.match__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  min-height: 2rem;
-}
-.match__tag {
-  padding: 0.1rem 0.4rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-.match__done { color: var(--accent); font-size: 0.9rem; font-weight: 700; }
-.match__error { color: var(--danger); font-size: 0.85rem; margin-top: 0.4rem; }
-
-.raw { margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-.raw summary { cursor: pointer; font-weight: 600; }
-.raw pre {
-  margin: 1rem 0 0; padding: 1rem; max-height: 28rem; overflow: auto;
-  background: var(--bg); border-radius: var(--radius-s);
-  color: var(--muted); font-size: 0.8rem; line-height: 1.5;
-}
-
-// ---------- Login ----------
-.login { display: grid; align-content: center; justify-items: start; gap: 1.5rem; min-height: 100dvh; max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem; }
-.login h1 { font-size: clamp(2.75rem, 8vw, 5rem); line-height: 1; letter-spacing: -0.05em; }
-.login p { max-width: 34rem; font-size: 1.15rem; color: var(--muted); }
-.login .state { padding: 0; }
-
-@media (max-width: 640px) {
-  .topbar__inner { flex-wrap: wrap; gap: 0.75rem 1.25rem; }
-  .nav { order: 3; flex-basis: 100%; }
-  .user { margin-left: auto; }
-  .user__name { display: none; }
-  .rank { width: 2rem; font-size: 1.6rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; scroll-behavior: auto !important; }
-}
-
-.page > h1 { margin-bottom: 1.5rem; }
-
 
 // ---------- Audio-Mood-Analyse ----------
 .audio-analysis {

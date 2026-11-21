@@ -6,6 +6,7 @@ import { PlaylistSuggestionDto, PlaylistSuggestionsResponseDto, SpotifyTrackDto,
 @Component({
   selector: 'app-playlist-suggestions',
   templateUrl: './playlist-suggestions.component.html',
+  styleUrl: './playlist-suggestions.component.scss'
 })
 export class PlaylistSuggestionsComponent {
   private readonly tracksApi = inject(TracksApi);

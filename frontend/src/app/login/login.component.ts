@@ -10,6 +10,7 @@ const DEFAULT_ERROR = 'Die Anmeldung bei Spotify hat nicht geklappt. Bitte versu
 @Component({
   selector: 'app-login-page',
   templateUrl: './login.component.html',
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   private readonly auth = inject(AuthService);
