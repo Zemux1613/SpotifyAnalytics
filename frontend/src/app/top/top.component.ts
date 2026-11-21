@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { errorMessage } from '../core/http-error';
 import { pickImage } from '../core/images';
@@ -23,6 +23,7 @@ const RANGES: { value: TimeRangeDto; label: string }[] = [
   selector: 'app-top-page',
   imports: [DurationPipe],
   templateUrl: './top.component.html',
+  styleUrl: './top.component.scss'
 })
 export class TopComponent {
   private readonly api = inject(MeApi);
@@ -34,6 +35,16 @@ export class TopComponent {
   protected readonly tracks = signal<SpotifyTrackDto[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly showAllArtists = signal(false);
+  protected readonly showAllTracks = signal(false);
+
+  protected readonly visibleArtists = computed(() =>
+    this.showAllArtists() ? this.artists() : this.artists().slice(0, 10)
+  );
+
+  protected readonly visibleTracks = computed(() =>
+    this.showAllTracks() ? this.tracks() : this.tracks().slice(0, 10)
+  );
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.subscription?.unsubscribe());

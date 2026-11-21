@@ -1,0 +1,151 @@
+// ---------- Verbesserte Listen & Top-Cards ----------
+.cols {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .cols { grid-template-columns: 1fr 1fr; }
+}
+
+.top-card {
+  width: 100%;
+  gap: 1rem;
+}
+
+.rank-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.55rem 0.65rem;
+  margin: 0 -0.65rem; // gleicht Padding optisch zur Card-Kante aus
+  border-radius: var(--radius-s);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  text-decoration: none;
+  transition: background-color 0.15s, transform 0.15s;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+li:last-child .item {
+  border-bottom: 0;
+}
+
+// Top 3 leicht hervorheben
+.item--podium {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 9%, transparent),
+    transparent 70%
+  );
+}
+
+.rank {
+  flex: none;
+  width: 2.1rem;
+  text-align: right;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--rank-dim);
+}
+.rank--top {
+  color: var(--accent);
+  font-size: 1.7rem;
+}
+
+.avatar, .cover-s {
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.item__title {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+
+  .pill {
+    text-transform: capitalize;
+    font-size: 0.68rem;
+    padding: 0.05rem 0.45rem;
+  }
+}
+
+.item__ext {
+  color: var(--accent);
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.item:hover .item__ext {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.top-card__more {
+  width: 100%;
+  text-align: center;
+}
+
+// ---------- Skeleton Loader ----------
+.skeleton {
+  background: var(--surface-2);
+  border-radius: var(--radius-s);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.skeleton--title { width: 8rem; height: 1.4rem; margin-bottom: 0.5rem; }
+.skeleton--rank { width: 1.8rem; height: 1.5rem; }
+.skeleton--media { width: 48px; height: 48px; border-radius: 50%; flex: none; }
+.skeleton--line { width: 65%; height: 0.95rem; }
+.skeleton--line-short { width: 40%; height: 0.75rem; margin-top: 0.35rem; }
+
+.cols {
+  display: grid;
+  // minmax(0, 1fr) ist entscheidend, damit text-overflow: ellipsis in Grid-Spalten greift!
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+// Falls du .card auf den beiden <section>s nutzt, überschreibe das Bento-Spanning:
+.cols > .card {
+  grid-column: auto;
+  width: 100%;
+}
+
+// Erst auf echten Smartphones untereinander stapeln:
+@media (max-width: 720px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
