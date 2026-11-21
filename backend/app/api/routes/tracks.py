@@ -3,6 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, Query
 from app.api.schemas import (
     API_ERROR_RESPONSES,
     AudioAnalysisResponse,
+    AudioAnalysisSummary,
     PlaylistSuggestionsResponse,
     TrackDetailsResponse,
     TrackSearchResponse,
@@ -31,6 +32,21 @@ def search_tracks(
     limit: int = Query(10, ge=1, le=10),  # spotify erlaubt in dev-mode max. 10
 ) -> TrackSearchResponse:
     return tracks.search(token, q.strip(), limit)
+
+
+@router.get(
+    "/audio-analysis/summary",
+    response_model=AudioAnalysisSummary,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_audio_analysis_summary",
+)
+def get_audio_analysis_summary(
+    analysis: AudioAnalysisServiceDep,
+    token: AccessTokenDep,
+    track_ids: list[str] = Query(default=[], max_length=50),
+) -> AudioAnalysisSummary:
+    """Status und Tempo (BPM) der bereits analysierten Tracks, z. B. für die Dashboard-Kachel."""
+    return {"tracks": analysis.summary(track_ids)}
 
 
 @router.get(

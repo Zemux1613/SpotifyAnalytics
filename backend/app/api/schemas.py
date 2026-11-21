@@ -135,6 +135,18 @@ class AudioAnalysisResponse(ApiModel):
     message: str | None = None
 
 
+class AudioSummaryTrack(ApiModel):
+    track_id: str
+    status: Literal[
+        "not_started", "queued", "processing", "completed", "failed", "unavailable"
+    ]
+    tempo_bpm: float | None = None
+
+
+class AudioAnalysisSummary(ApiModel):
+    tracks: list[AudioSummaryTrack]
+
+
 class UserProfile(ApiModel):
     id: str
     display_name: str | None = None
@@ -172,6 +184,12 @@ class ModelInfo(ApiModel):
     genres: int
     trained_at: datetime
     cached: bool
+
+
+class ModelStatusResponse(ApiModel):
+    trained: bool
+    model: ModelInfo | None = None
+    expires_in_seconds: int | None = None
 
 
 class PlaylistSuggestionsResponse(ApiModel):
@@ -223,6 +241,12 @@ class ListeningStreak(ApiModel):
     tracked_since: str | None = None
 
 
+class ListeningDay(ApiModel):
+    date: str  # ISO-Datum (YYYY-MM-DD) in der Zeitzone des Users
+    minutes: float = Field(ge=0)
+    plays: int = Field(ge=0)
+
+
 class ListeningInsightsResponse(ApiModel):
     time_range: TimeRange
     timezone: str
@@ -232,3 +256,4 @@ class ListeningInsightsResponse(ApiModel):
     heatmap: list[ListeningHeatmapCell]
     discovery: DiscoveryStats
     streak: ListeningStreak
+    daily: list[ListeningDay] = Field(default_factory=list)  # letzte 14 Tage, älteste zuerst

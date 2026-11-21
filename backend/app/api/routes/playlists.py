@@ -5,6 +5,7 @@ from app.api.schemas import (
     API_ERROR_RESPONSES,
     AddTrackRequest,
     AddTrackResponse,
+    ModelStatusResponse,
     PlaylistSummary,
 )
 from app.api.deps import (
@@ -43,6 +44,36 @@ def list_playlists(
         for item in items
         if item.get("id")
     ]
+
+
+@router.get(
+    "/model",
+    response_model=ModelStatusResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_playlist_model_status",
+)
+def get_model_status(
+    recommender: RecommenderServiceDep,
+    token: AccessTokenDep,
+    session_id: SessionIdDep,
+) -> ModelStatusResponse:
+    """Status des Playlist-Modells (trainiert/gecacht), ohne es zu trainieren."""
+    return recommender.get_model_status(token, session_id)
+
+
+@router.post(
+    "/model",
+    response_model=ModelStatusResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="train_playlist_model",
+)
+def train_model(
+    recommender: RecommenderServiceDep,
+    token: AccessTokenDep,
+    session_id: SessionIdDep,
+) -> ModelStatusResponse:
+    """Trainiert das Playlist-Modell neu und liefert den neuen Status."""
+    return recommender.train_model(token, session_id)
 
 
 @router.post(

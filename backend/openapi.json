@@ -421,6 +421,148 @@
         }
       }
     },
+    "/playlists/model": {
+      "get": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Get Model Status",
+        "description": "Status des Playlist-Modells (trainiert/gecacht), ohne es zu trainieren.",
+        "operationId": "get_playlist_model_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Train Model",
+        "description": "Trainiert das Playlist-Modell neu und liefert den neuen Status.",
+        "operationId": "train_playlist_model",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playlists/{playlist_id}/tracks": {
       "post": {
         "tags": [
@@ -553,6 +695,94 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TrackSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tracks/audio-analysis/summary": {
+      "get": {
+        "tags": [
+          "tracks"
+        ],
+        "summary": "Get Audio Analysis Summary",
+        "description": "Status und Tempo (BPM) der bereits analysierten Tracks, z. B. für die Dashboard-Kachel.",
+        "operationId": "get_audio_analysis_summary",
+        "parameters": [
+          {
+            "name": "track_ids",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 50,
+              "default": [],
+              "title": "Track Ids"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AudioAnalysisSummary"
                 }
               }
             }
@@ -1124,6 +1354,22 @@
         ],
         "title": "AudioAnalysisResponse"
       },
+      "AudioAnalysisSummary": {
+        "properties": {
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/AudioSummaryTrack"
+            },
+            "type": "array",
+            "title": "Tracks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tracks"
+        ],
+        "title": "AudioAnalysisSummary"
+      },
       "AudioFeatures": {
         "properties": {
           "tempo_bpm": {
@@ -1217,6 +1463,43 @@
           "texture"
         ],
         "title": "AudioRadarValues"
+      },
+      "AudioSummaryTrack": {
+        "properties": {
+          "track_id": {
+            "type": "string",
+            "title": "Track Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "queued",
+              "processing",
+              "completed",
+              "failed",
+              "unavailable"
+            ],
+            "title": "Status"
+          },
+          "tempo_bpm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tempo Bpm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "track_id",
+          "status"
+        ],
+        "title": "AudioSummaryTrack"
       },
       "DiscoveryStats": {
         "properties": {
@@ -1369,6 +1652,31 @@
         ],
         "title": "HealthResponse"
       },
+      "ListeningDay": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "minutes": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Minutes"
+          },
+          "plays": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Plays"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "minutes",
+          "plays"
+        ],
+        "title": "ListeningDay"
+      },
       "ListeningHeatmapCell": {
         "properties": {
           "weekday": {
@@ -1438,6 +1746,13 @@
           },
           "streak": {
             "$ref": "#/components/schemas/ListeningStreak"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/ListeningDay"
+            },
+            "type": "array",
+            "title": "Daily"
           }
         },
         "type": "object",
@@ -1538,6 +1853,40 @@
           "cached"
         ],
         "title": "ModelInfo"
+      },
+      "ModelStatusResponse": {
+        "properties": {
+          "trained": {
+            "type": "boolean",
+            "title": "Trained"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_in_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trained"
+        ],
+        "title": "ModelStatusResponse"
       },
       "PlaylistSuggestion": {
         "properties": {

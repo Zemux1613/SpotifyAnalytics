@@ -23,6 +23,12 @@ export interface ListeningStreak {
   tracked_since: string | null;
 }
 
+export interface ListeningDay {
+  date: string; // YYYY-MM-DD in der Zeitzone des Users
+  minutes: number;
+  plays: number;
+}
+
 export interface ListeningInsights {
   time_range: string;
   timezone: string;
@@ -32,4 +38,5 @@ export interface ListeningInsights {
   heatmap: ListeningHeatmapCell[];
   discovery: DiscoveryStats;
   streak: ListeningStreak;
+  daily: ListeningDay[]; // letzte 14 Tage, älteste zuerst
 }

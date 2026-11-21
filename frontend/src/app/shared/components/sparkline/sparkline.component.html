@@ -1,0 +1,31 @@
+<div class="spark" (pointermove)="onMove($event)" (pointerleave)="active.set(null)">
+  <svg
+    [attr.viewBox]="'0 0 ' + W + ' ' + H"
+    preserveAspectRatio="none"
+    role="img"
+    [attr.aria-label]="ariaLabel()"
+  >
+    @if (type() === 'bar') {
+      @for (bar of bars(); track $index) {
+        <rect
+          class="spark__bar"
+          [class.spark__bar--on]="$index === focus()"
+          [attr.x]="bar.x"
+          [attr.y]="bar.y"
+          [attr.width]="bar.w"
+          [attr.height]="bar.h"
+          rx="1"
+        />
+      }
+    } @else {
+      <path class="spark__area" [attr.d]="areaPath()" />
+      <path class="spark__line" [attr.d]="linePath()" />
+    }
+  </svg>
+  @if (type() === 'line' && dot(); as d) {
+    <span class="spark__dot" [style.left.%]="d.x" [style.top.%]="d.y"></span>
+  }
+  @if (active() !== null && tooltip(); as tip) {
+    <span class="spark__tip" [style.left.%]="tipLeft()">{{ tip }}</span>
+  }
+</div>

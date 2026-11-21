@@ -95,6 +95,22 @@ class AudioAnalysisService:
             background_tasks.add_task(self._analyse, track_id, preview_url)
             return self._jobs[track_id]
 
+    def summary(self, track_ids: list[str]) -> list[dict[str, Any]]:
+        """Status und Tempo je Track (ohne Analyse -> not_started), in Anfrage-Reihenfolge."""
+        with self._lock:
+            result = []
+            for track_id in dict.fromkeys(track_ids):  # Duplikate raus, Reihenfolge bleibt
+                job = self._jobs.get(track_id)
+                tempo = job.features.tempo_bpm if job and job.features else None
+                result.append(
+                    {
+                        "track_id": track_id,
+                        "status": job.status if job else "not_started",
+                        "tempo_bpm": tempo,
+                    }
+                )
+            return result
+
     def get_status(self, track_id: str) -> AudioAnalysisResponse:
         with self._lock:
             return self._jobs.get(

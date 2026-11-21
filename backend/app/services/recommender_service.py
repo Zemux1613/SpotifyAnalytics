@@ -65,6 +65,31 @@ class RecommenderService:
             "message": message,
         }
 
+    def get_model_status(self, access_token: str, session_id: str | None) -> dict[str, Any]:
+        """Status des gecachten Modells, ohne es zu trainieren."""
+        key = self._cache_key(access_token, session_id)
+        with self._cache_lock:
+            entry = self._cache.get(key)
+        age = time.monotonic() - entry[0] if entry else None
+        if entry is None or age >= CACHE_TTL:
+            return {"trained": False, "model": None, "expires_in_seconds": None}
+        stats = entry[1].stats()
+        stats["cached"] = True
+        return {
+            "trained": True,
+            "model": stats,
+            "expires_in_seconds": max(0, int(CACHE_TTL - age)),
+        }
+
+    def train_model(self, access_token: str, session_id: str | None) -> dict[str, Any]:
+        """Trainiert das Modell neu (wie refresh=true bei den Vorschlägen)."""
+        self._get_model(access_token, session_id, refresh=True)
+        return self.get_model_status(access_token, session_id)
+
+    @staticmethod
+    def _cache_key(access_token: str, session_id: str | None) -> str:
+        return session_id or f"token:{hash(access_token)}"
+
     def add_track(
         self,
         access_token: str,
@@ -91,7 +116,7 @@ class RecommenderService:
     def _get_model(
         self, access_token: str, session_id: str | None, refresh: bool
     ) -> tuple[PlaylistClassifier, bool]:
-        key = session_id or f"token:{hash(access_token)}"
+        key = self._cache_key(access_token, session_id)
         now = time.monotonic()
 
         with self._cache_lock:

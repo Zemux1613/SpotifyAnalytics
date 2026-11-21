@@ -18,6 +18,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from app.clients.spotify_client import SpotifyClient
 from app.domain import TimeRange
 
+DAILY_DAYS = 14
+
 RANGE_DAYS = {
     TimeRange.SHORT_TERM: 28,
     TimeRange.MEDIUM_TERM: 180,
@@ -48,7 +50,7 @@ class ListeningInsightsService:
 
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT track_id, played_at, artist_ids FROM plays "
+                "SELECT track_id, played_at, artist_ids, duration_ms FROM plays "
                 "WHERE user_id = ? ORDER BY played_at ASC",
                 (user_id,),
             ).fetchall()
@@ -63,6 +65,7 @@ class ListeningInsightsService:
                 "track_id": row[0],
                 "played_at": datetime.fromisoformat(row[1]).astimezone(user_timezone),
                 "artist_ids": json.loads(row[2]),
+                "duration_ms": row[3],
             }
             for row in rows
         ]
@@ -87,6 +90,8 @@ class ListeningInsightsService:
         for event in current_events:
             played_at = event["played_at"]
             heatmap[played_at.weekday()][played_at.hour] += 1
+
+        daily = self._daily(events, now.date())
 
         play_dates = sorted({event["played_at"].date() for event in events})
         current_streak, longest_streak = self._streaks(play_dates, now.date())
@@ -119,7 +124,25 @@ class ListeningInsightsService:
                 "longest_days": longest_streak,
                 "tracked_since": oldest_play.date().isoformat() if oldest_play else None,
             },
+            "daily": daily,
         }
+
+    @staticmethod
+    def _daily(events: list[dict[str, Any]], today: Any, days: int = DAILY_DAYS) -> list[dict[str, Any]]:
+        """Hördauer pro Kalendertag (Zeitzone des Users). Tracks ohne bekannte Länge zählen 0 Minuten."""
+        minutes: dict[Any, float] = {}
+        plays: dict[Any, int] = {}
+        for event in events:
+            day = event["played_at"].date()
+            plays[day] = plays.get(day, 0) + 1
+            minutes[day] = minutes.get(day, 0.0) + (event["duration_ms"] or 0) / 60_000
+        series = []
+        for offset in range(days - 1, -1, -1):
+            day = today - timedelta(days=offset)
+            series.append(
+                {"date": day.isoformat(), "minutes": round(minutes.get(day, 0.0), 1), "plays": plays.get(day, 0)}
+            )
+        return series
 
     def _store_recent_plays(self, user_id: str, items: list[dict[str, Any]]) -> None:
         with self._connect() as connection:
@@ -131,10 +154,20 @@ class ListeningInsightsService:
                     continue
                 timestamp = datetime.fromisoformat(played_at.replace("Z", "+00:00")).astimezone(timezone.utc)
                 artist_ids = sorted({artist["id"] for artist in (track.get("artists") or []) if artist.get("id")})
+                duration_ms = track.get("duration_ms")
+                key = (user_id, track_id, timestamp.isoformat())
                 connection.execute(
-                    "INSERT OR IGNORE INTO plays (user_id, track_id, played_at, artist_ids) VALUES (?, ?, ?, ?)",
-                    (user_id, track_id, timestamp.isoformat(), json.dumps(artist_ids)),
+                    "INSERT OR IGNORE INTO plays (user_id, track_id, played_at, artist_ids, duration_ms) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (*key, json.dumps(artist_ids), duration_ms),
                 )
+                if duration_ms is not None:
+                    # Altbestand aus der Zeit vor der Dauer-Spalte nachtragen
+                    connection.execute(
+                        "UPDATE plays SET duration_ms = ? WHERE user_id = ? AND track_id = ? "
+                        "AND played_at = ? AND duration_ms IS NULL",
+                        (duration_ms, *key),
+                    )
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
@@ -160,6 +193,9 @@ class ListeningInsightsService:
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_plays_user_date ON plays(user_id, played_at)"
             )
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(plays)")}
+            if "duration_ms" not in columns:  # Migration für bestehende Datenbanken
+                connection.execute("ALTER TABLE plays ADD COLUMN duration_ms INTEGER")
 
     @staticmethod
     def _discovery(
