@@ -15,7 +15,7 @@ import {
 } from '../api/generated';
 import { DashboardKpiApi } from './dashboard-kpi.api';
 import { AudioSummaryTrack, ModelStatus } from './dashboard-kpi.model';
-import { DashboardStats, Metric } from './dashboard.model.component';
+import { DashboardStats, Metric } from './dashboard.model';
 import { ListeningInsightsApi } from './listening-insights.api';
 import { ListeningHeatmapCell, ListeningInsights } from './listening-insights.model';
 

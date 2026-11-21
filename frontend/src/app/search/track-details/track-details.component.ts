@@ -4,22 +4,13 @@ import {Observable, Subscription, switchMap, takeWhile, timer } from 'rxjs';
 import { pickImage } from '../../core/images';
 import { AudioAnalysisResponseDto, SpotifyArtistDto, TrackDetailsResponseDto, TracksApi } from '../../api/generated';
 import { formatDuration, formatReleaseDate } from '@shared/format';
-
-const ALBUM_TYPES: Record<string, string> = {
-  album: 'Album',
-  single: 'Single',
-  compilation: 'Compilation',
-};
-
-interface Fact {
-  label: string;
-  value: string;
-}
+import { Fact, ALBUM_TYPES } from './track-details.models'
 
 @Component({
   selector: 'app-track-details',
   imports: [DecimalPipe, JsonPipe],
   templateUrl: './track-details.component.html',
+  styleUrl: './track-details.component.scss'
 })
 export class TrackDetailsComponent {
   private readonly tracksApi = inject(TracksApi);

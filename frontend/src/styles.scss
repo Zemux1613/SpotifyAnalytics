@@ -285,25 +285,6 @@ app-sparkline { display: block; margin-top: auto; width: 100%; }
 
 .note { margin-top: 1.5rem; max-width: 62ch; }
 
-// ---------- Song-Details ----------
-.details { background: var(--surface); border-radius: var(--radius-m); padding: 1.5rem; }
-.details__head { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
-.details__cover { width: 220px; height: 220px; border-radius: var(--radius-s); object-fit: cover; background: var(--surface-2); }
-.details__title { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; min-width: 0; flex: 1 1 14rem; }
-.details__title h2 { font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15; letter-spacing: -0.03em; font-weight: 800; overflow-wrap: anywhere; }
-.details__artists { font-size: 1.1rem; font-weight: 600; }
-.details__title .btn { margin-top: auto; }
-.badge { display: inline-block; padding: 0.1rem 0.5rem; border: 1px solid var(--muted); border-radius: var(--radius-s); color: var(--muted); font-size: 0.8rem; font-weight: 700; }
-
-.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 0 2rem; }
-.facts__row { padding: 0.65rem 0; border-top: 1px solid var(--line); min-width: 0; }
-.facts dt { color: var(--muted); font-size: 0.85rem; }
-.facts dd { font-weight: 600; overflow-wrap: anywhere; }
-
-.details__section { margin-top: 1.5rem; }
-.details__section h3 { margin-bottom: 0.5rem; }
-.artist-rows .avatar { width: 48px; height: 48px; }
-
 // ---------- Audio-Mood-Analyse ----------
 .audio-analysis {
   padding-top: 1.25rem;
