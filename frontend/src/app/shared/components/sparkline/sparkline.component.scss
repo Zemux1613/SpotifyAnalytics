@@ -1,0 +1,20 @@
+// Sparklines
+.spark { position: relative; height: 3.25rem; margin-top: auto; width: 100%; touch-action: pan-y; }
+app-sparkline { display: block; margin-top: auto; width: 100%; }
+.spark--tall { display: block; }
+.spark--tall .spark { height: 5.5rem; }
+.spark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.spark__line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.spark__area { fill: color-mix(in srgb, var(--accent) 16%, transparent); stroke: none; }
+.spark__bar { fill: var(--rank-dim); opacity: 0.55; transition: opacity 0.1s, fill 0.1s; }
+.spark__bar--on { fill: var(--accent); opacity: 1; }
+.spark__dot {
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--surface);
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+.spark__tip {
+  position: absolute; bottom: calc(100% + 0.35rem); transform: translateX(-50%); z-index: 2;
+  padding: 0.15rem 0.45rem; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-s);
+  font-size: 0.72rem; font-weight: 600; white-space: nowrap; pointer-events: none;
+}

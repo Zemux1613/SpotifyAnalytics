@@ -318,7 +318,7 @@
     </article>
 
     <!-- Überblick (geschätzte Kennzahlen) -->
-    <article class="card card--6" aria-labelledby="overview-title">
+    <article class="card card--12" aria-labelledby="overview-title">
       <h2 class="card__label" id="overview-title">Überblick</h2>
       @if (loading()) {
         <p class="card__state" aria-live="polite">Wird geladen …</p>
@@ -343,46 +343,5 @@
         </div>
       }
     </article>
-
-    <!-- Top-Genres -->
-    <article class="card card--6" aria-labelledby="top-genres">
-      <h2 class="card__label" id="top-genres">Deine Top-Genres</h2>
-      @if (loading()) {
-        <p class="card__state" aria-live="polite">Wird geladen …</p>
-      } @else if (error()) {
-        <p class="card__state">Nicht verfügbar</p>
-      } @else if (genres().length === 0) {
-        <p class="card__state">Für diesen Zeitraum liegen noch keine Genre-Daten vor.</p>
-      } @else {
-        <ol class="genre-list">
-          @for (genre of genres(); track genre.name) {
-            <li class="genre">
-              <span class="genre__rank" [class.genre__rank--top]="$index < 3">{{ $index + 1 }}</span>
-              <div class="genre__meta">
-                <div class="genre__line">
-                  <span class="genre__name">{{ genre.name }}</span>
-                  <span class="muted muted--small">{{ genreLabel(genre.count) }}</span>
-                </div>
-                <div class="genre__bar" aria-hidden="true">
-                  <span [style.width.%]="barWidth(genre.count)"></span>
-                </div>
-              </div>
-            </li>
-          }
-        </ol>
-      }
-    </article>
   </div>
-
-  <p class="note muted muted--small">
-    Die Hörhistorie wird ab dem ersten Aufruf dieses Dashboards gespeichert. Spotify stellt pro Abruf höchstens 50
-    zuletzt gehörte Tracks bereit; zwischen Dashboard-Aufrufen können deshalb Hörereignisse verloren gehen. Die
-    Hörzeit summiert die volle Länge der erfassten Tracks (übersprungene Songs werden nicht erkannt).
-    Neuentdeckungen bedeuten: erstmals in der hier erfassten Historie – nicht zwingend zum allerersten Mal gehört.
-  </p>
-  <p class="note muted muted--small">
-    Schätzung: Spotify stellt keine echten Stream- oder Hörminuten-Daten bereit. Die Zahlen im Überblick basieren
-    auf deinen Top-50-Tracks und -Künstlern; Streams sind aus dem Popularitätswert abgeleitet und die Prozentwerte
-    vergleichen zwei Zeiträume. Der Ø-BPM stammt aus einer eigenen Analyse der Preview-Snippets deiner Top-Tracks.
-  </p>
 </section>

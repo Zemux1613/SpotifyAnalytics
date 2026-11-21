@@ -64,6 +64,7 @@ function dayLabel(isoDate: string): string {
   selector: 'app-dashboard-page',
   templateUrl: './dashboard.component.html',
   imports: [DatePipe, NgTemplateOutlet, SparklineComponent],
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
   private readonly api = inject(MeApi);

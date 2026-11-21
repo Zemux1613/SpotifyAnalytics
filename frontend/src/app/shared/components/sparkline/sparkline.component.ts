@@ -12,6 +12,7 @@ const PAD = 3;
   selector: 'app-sparkline',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sparkline.component.html',
+  styleUrl: './sparkline.component.scss'
 })
 export class SparklineComponent {
   readonly values = input.required<number[]>();
