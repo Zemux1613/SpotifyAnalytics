@@ -5,17 +5,6 @@ Nach dem Login mit Spotify siehst du deine Top Artists und Top Tracks und kannst
 Zu jedem gefundenen Song schlägt dir ein trainierter Klassifikator passende Playlists vor und
 fügt ihn dort per Klick hinzu.
 
-# Playlist-Empfehlungen
-- Das Backend liest deine Playlists (`/me/playlists`) und deren Tracks (`/playlists/{id}/tracks`)
-  sowie die Genres der Künstler (`/artists`).
-- Pro Playlist wird ein Random-Forest-Klassifikator trainiert (Genres + Track-Metadaten).
-  Die Ausgabe ist die geschätzte Passgenauigkeit in Prozent.
-- Das Modell wird beim ersten Vorschlag aufgebaut und 30 Minuten im Speicher gecacht.
-  Der Button „Neu berechnen“ baut es neu auf.
-- Berücksichtigt werden nur Playlists, die dir gehören oder kollaborativ sind – nur dort
-  funktioniert das Hinzufügen per Spotify-API.
-- Nach dieser Änderung sind neue Spotify-Scopes nötig: einmal abmelden und neu anmelden.
-
 # Einmalig einrichten
 1. Im [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) eine App anlegen.
 2. Redirect-URI eintragen: `http://127.0.0.1:8000/callback` (`127.0.0.1`, nicht `localhost`).
