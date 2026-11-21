@@ -88,7 +88,7 @@ def start_track_audio_analysis(
 ) -> AudioAnalysisResponse:
     """Startet die Audio-Analyse eines Spotify-Preview-Snippets."""
     details = tracks.get_details(token, track_id)
-    preview_url = details["track"].get("preview_url")
+    preview_url = analysis.resolve_preview_url(details["track"])
     return analysis.enqueue(track_id, preview_url, background_tasks)
 
 
