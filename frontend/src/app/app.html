@@ -1,0 +1,22 @@
+@if (auth.user(); as user) {
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" routerLink="/dashboard">SpotifyAnalytics</a>
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/top" routerLinkActive="active">Top-Listen</a>
+        <a routerLink="/search" routerLinkActive="active">Song suchen</a>
+      </nav>
+      <div class="user">
+        @if (avatar(); as src) {
+          <img class="user__avatar" [src]="src" alt="" width="32" height="32">
+        }
+        <span class="user__name">{{ user.display_name ?? user.id }}</span>
+        <button type="button" class="btn btn--ghost" (click)="auth.logout()">Abmelden</button>
+      </div>
+    </div>
+  </header>
+}
+<main>
+  <router-outlet />
+</main>

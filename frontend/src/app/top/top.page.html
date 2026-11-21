@@ -1,0 +1,74 @@
+<section class="page">
+  <div class="page__head">
+    <h1>Meine Top-Listen</h1>
+    <div class="segmented" role="group" aria-label="Zeitraum">
+      @for (r of ranges; track r.value) {
+        <button type="button" [attr.aria-pressed]="range() === r.value" (click)="select(r.value)">
+          {{ r.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (error(); as message) {
+    <div class="state state--error" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" class="btn btn--ghost" (click)="load()">Erneut versuchen</button>
+    </div>
+  } @else if (loading()) {
+    <p class="state" aria-live="polite">Deine Listen werden geladen …</p>
+  } @else {
+    <div class="cols">
+      <section aria-labelledby="top-artists">
+        <h2 id="top-artists">Top Artists</h2>
+        @if (artists().length === 0) {
+          <p class="state">In diesem Zeitraum gibt es noch keine Daten. Höre ein paar Songs und schau später wieder vorbei.</p>
+        } @else {
+          <ol class="rank-list">
+            @for (artist of artists(); track artist.id) {
+              <li class="item">
+                <span class="rank" [class.rank--top]="$index < 3">{{ $index + 1 }}</span>
+                @if (image(artist.images, 112); as src) {
+                  <img class="avatar" [src]="src" alt="" width="56" height="56">
+                } @else {
+                  <span class="avatar avatar--empty"></span>
+                }
+                <div class="item__text">
+                  <a class="item__title" [href]="artist.external_urls?.spotify" target="_blank" rel="noopener">{{ artist.name }}</a>
+                  @if (genres(artist); as g) {
+                    <span class="muted">{{ g }}</span>
+                  }
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+
+      <section aria-labelledby="top-tracks">
+        <h2 id="top-tracks">Top Tracks</h2>
+        @if (tracks().length === 0) {
+          <p class="state">In diesem Zeitraum gibt es noch keine Daten. Höre ein paar Songs und schau später wieder vorbei.</p>
+        } @else {
+          <ol class="rank-list">
+            @for (track of tracks(); track track.id) {
+              <li class="item">
+                <span class="rank" [class.rank--top]="$index < 3">{{ $index + 1 }}</span>
+                @if (image(track.album.images, 112); as src) {
+                  <img class="cover-s" [src]="src" alt="" width="56" height="56">
+                } @else {
+                  <span class="cover-s avatar--empty"></span>
+                }
+                <div class="item__text">
+                  <a class="item__title" [href]="track.external_urls?.spotify" target="_blank" rel="noopener">{{ track.name }}</a>
+                  <span class="muted">{{ artistNames(track) }}</span>
+                </div>
+                <span class="item__aside muted">{{ track.duration_ms | duration }}</span>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    </div>
+  }
+</section>

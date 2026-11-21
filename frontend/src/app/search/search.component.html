@@ -1,0 +1,62 @@
+<section class="page">
+  <h1>Song suchen</h1>
+
+  <form class="search-form" role="search" (submit)="search($event)">
+    <label class="visually-hidden" for="song-query">Songname</label>
+    <input
+      id="song-query"
+      type="search"
+      name="q"
+      maxlength="100"
+      autocomplete="off"
+      placeholder="Songname eingeben"
+      [value]="query()"
+      (input)="onInput($event)"
+    >
+    <button type="submit" class="btn" [disabled]="searching() || !query().trim()">Suchen</button>
+  </form>
+
+  @if (searchError(); as message) {
+    <p class="state state--error" role="alert">{{ message }}</p>
+  } @else if (searching()) {
+    <p class="state" aria-live="polite">Suche läuft …</p>
+  } @else if (results(); as list) {
+    @if (list.length === 0) {
+      <p class="state">Keine Treffer für „{{ lastQuery() }}“. Prüfe die Schreibweise oder ergänze den Künstlernamen.</p>
+    } @else {
+      <div class="search-layout">
+        <ul class="results" aria-label="Treffer">
+          @for (track of list; track track.id) {
+            <li>
+              <button type="button" class="result" [attr.aria-current]="track.id === selectedId()" (click)="select(track)">
+                @if (image(track.album.images, 96); as src) {
+                  <img class="cover-s" [src]="src" alt="" width="48" height="48">
+                } @else {
+                  <span class="cover-s avatar--empty"></span>
+                }
+                <span class="item__text">
+                  <span class="item__title">{{ track.name }}</span>
+                  <span class="muted">{{ artistNames(track) }}</span>
+                  <span class="muted muted--small">{{ track.album.name }}</span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <div class="search-layout__details" aria-live="polite">
+          @if (detailsError(); as message) {
+            <p class="state state--error" role="alert">{{ message }}</p>
+          } @else if (loadingDetails()) {
+            <p class="state">Details werden geladen …</p>
+          } @else if (details(); as d) {
+            <app-track-details [data]="d" />
+            <app-playlist-suggestions [track]="d.track" />
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <p class="state">Gib einen Songnamen ein, zum Beispiel „Get Lucky“. Mit Künstlername wird die Suche genauer.</p>
+  }
+</section>

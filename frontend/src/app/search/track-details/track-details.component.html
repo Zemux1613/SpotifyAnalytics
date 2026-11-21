@@ -1,0 +1,55 @@
+<article class="details">
+  <header class="details__head">
+    @if (cover(); as src) {
+      <img class="details__cover" [src]="src" alt="Albumcover von {{ track().album.name }}" width="220" height="220">
+    } @else {
+      <div class="details__cover details__cover--empty" aria-hidden="true"></div>
+    }
+    <div class="details__title">
+      <h2>{{ track().name }}</h2>
+      <p class="details__artists">{{ artistNames() }}</p>
+      <p class="muted">{{ track().album.name }}</p>
+      @if (track().explicit) {
+        <p><span class="badge">Explicit</span></p>
+      }
+      @if (track().external_urls?.spotify; as url) {
+        <a class="btn" [href]="url" target="_blank" rel="noopener">In Spotify öffnen</a>
+      }
+    </div>
+  </header>
+
+  <dl class="facts">
+    @for (fact of facts(); track fact.label) {
+      <div class="facts__row">
+        <dt>{{ fact.label }}</dt>
+        <dd>{{ fact.value }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (data().artists.length) {
+    <section class="details__section">
+      <h3>{{ data().artists.length === 1 ? 'Künstler' : 'Künstler:innen' }}</h3>
+      <ul class="artist-rows">
+        @for (artist of data().artists; track artist.id) {
+          <li class="item">
+            @if (avatar(artist); as src) {
+              <img class="avatar" [src]="src" alt="" width="48" height="48">
+            } @else {
+              <span class="avatar avatar--empty"></span>
+            }
+            <div class="item__text">
+              <a class="item__title" [href]="artist.external_urls?.spotify" target="_blank" rel="noopener">{{ artist.name }}</a>
+              <span class="muted">{{ genres(artist) || 'Keine Genres hinterlegt' }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <details class="raw">
+    <summary>Alle Rohdaten anzeigen (JSON)</summary>
+    <pre>{{ data() | json }}</pre>
+  </details>
+</article>

@@ -1,0 +1,74 @@
+<section class="page">
+  <div class="page__head">
+    <div>
+      <h1>Dein Dashboard</h1>
+      <p class="muted">Was deine Top-Listen über deinen Musikgeschmack verraten.</p>
+    </div>
+    <div class="segmented" role="group" aria-label="Zeitraum">
+      @for (r of ranges; track r.value) {
+        <button type="button" [attr.aria-pressed]="range() === r.value" (click)="select(r.value)">
+          {{ r.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (error(); as message) {
+    <div class="state state--error" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" class="btn btn--ghost" (click)="load()">Erneut versuchen</button>
+    </div>
+  } @else if (loading()) {
+    <p class="state" aria-live="polite">Dein Dashboard wird geladen …</p>
+  } @else {
+    <div class="stats">
+      @for (metric of metrics(); track metric.label) {
+        <article class="stat">
+          <span class="stat__label">{{ metric.label }}</span>
+          <span class="stat__value">{{ metric.value }}</span>
+          <span
+            class="stat__change"
+            [class.stat__change--up]="(metric.change ?? 0) > 0"
+            [class.stat__change--down]="(metric.change ?? 0) < 0"
+            [class.stat__change--flat]="!metric.change"
+            [title]="referenceLabel()"
+          >
+            {{ formatChange(metric.change) }}
+          </span>
+        </article>
+      }
+    </div>
+
+    <section class="genres" aria-labelledby="top-genres">
+      <h2 id="top-genres">Deine Top-Genres</h2>
+      @if (genres().length === 0) {
+        <p class="state">Für diesen Zeitraum liegen noch keine Genre-Daten vor.</p>
+      } @else {
+        <ol class="genre-list">
+          @for (genre of genres(); track genre.name) {
+            <li class="genre">
+              <span class="genre__rank" [class.genre__rank--top]="$index < 3">{{
+                $index + 1
+              }}</span>
+              <div class="genre__meta">
+                <div class="genre__line">
+                  <span class="genre__name">{{ genre.name }}</span>
+                  <span class="muted muted--small">{{ genreLabel(genre.count) }}</span>
+                </div>
+                <div class="genre__bar" aria-hidden="true">
+                  <span [style.width.%]="barWidth(genre.count)"></span>
+                </div>
+              </div>
+            </li>
+          }
+        </ol>
+      }
+    </section>
+
+    <p class="note muted muted--small">
+      Schätzung: Spotify stellt keine echten Stream- oder Hörminuten-Daten bereit. Die Zahlen
+      basieren auf deinen Top-50-Tracks und -Künstlern; Streams sind aus dem Popularitätswert
+      abgeleitet und die Prozentwerte vergleichen zwei Zeiträume.
+    </p>
+  }
+</section>

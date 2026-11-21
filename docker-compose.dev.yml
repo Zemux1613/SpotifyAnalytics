@@ -1,0 +1,15 @@
+services:
+  backend:
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app:ro
+
+  frontend:
+    build:
+      target: dev
+    environment:
+      API_TARGET: http://backend:8000
+    volumes:
+      - ./frontend:/app
+      # node_modules bleibt im container, sonst überdeckt das bind-mount sie mit dem host-ordner
+      - /app/node_modules

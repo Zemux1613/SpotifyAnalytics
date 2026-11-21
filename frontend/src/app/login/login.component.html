@@ -1,0 +1,13 @@
+<section class="login">
+  <h1>Was hörst du wirklich?</h1>
+  <p>
+    Melde dich mit deinem Spotify-Account an. Danach siehst du deine meistgehörten Künstler und Songs
+    und kannst jeden Song mit allen Details nachschlagen.
+  </p>
+  @if (error) {
+    <p class="state state--error" role="alert">{{ error }}</p>
+  }
+  <div>
+    <button type="button" class="btn btn--large" (click)="login()">Mit Spotify anmelden</button>
+  </div>
+</section>

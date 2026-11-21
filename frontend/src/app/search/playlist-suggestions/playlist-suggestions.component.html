@@ -1,0 +1,90 @@
+<section class="matches" aria-labelledby="playlist-matches-title">
+  <div class="matches__head">
+    <h3 id="playlist-matches-title">Passt in deine Playlists</h3>
+    <button type="button" class="btn btn--ghost" (click)="reload()" [disabled]="loading()">
+      Neu berechnen
+    </button>
+  </div>
+
+  @if (error(); as message) {
+    <div class="state state--error" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" class="btn btn--ghost" (click)="reload()">Erneut versuchen</button>
+    </div>
+  } @else if (loading()) {
+    <p class="state" aria-live="polite">
+      Playlist-Modell wird berechnet … Beim ersten Song kann das ein paar Sekunden dauern.
+    </p>
+  } @else if (response(); as result) {
+    @if (result.message; as message) {
+      <p class="state">{{ message }}</p>
+    }
+
+    @if (result.suggestions.length > 0) {
+      <ul class="matches__list">
+        @for (suggestion of result.suggestions; track suggestion.playlist_id) {
+          <li class="match">
+            <div class="match__row">
+              @if (suggestion.image_url; as src) {
+                <img class="match__cover" [src]="src" alt="" width="44" height="44">
+              } @else {
+                <span class="match__cover match__cover--empty" aria-hidden="true"></span>
+              }
+              <div class="match__text">
+                <span class="match__name">{{ suggestion.name }}</span>
+                <span class="muted muted--small">
+                  {{ count(suggestion.track_count) }} Songs
+                  @if (suggestion.top_genres.length) {
+                    · {{ suggestion.top_genres.join(', ') }}
+                  }
+                </span>
+              </div>
+              <span class="match__percent">{{ suggestion.match_percent }} %</span>
+            </div>
+
+            <div
+              class="match__bar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="suggestion.match_percent"
+              [attr.aria-label]="suggestion.match_percent + ' Prozent Passung'"
+            >
+              <span [style.width.%]="suggestion.match_percent"></span>
+            </div>
+
+            <div class="match__actions">
+              @if (suggestion.method === 'genre_fallback') {
+                <span class="match__tag">Genre-Schätzung</span>
+              }
+              @if (isAdded(suggestion)) {
+                <span class="match__done">Bereits enthalten</span>
+              } @else {
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  (click)="add(suggestion)"
+                  [disabled]="addingId() === suggestion.playlist_id"
+                >
+                  {{ addingId() === suggestion.playlist_id ? 'Wird hinzugefügt …' : 'Hinzufügen' }}
+                </button>
+              }
+            </div>
+
+            @if (addError(suggestion.playlist_id); as message) {
+              <p class="match__error" role="alert">{{ message }}</p>
+            }
+          </li>
+        }
+      </ul>
+
+      <p class="note muted muted--small">
+        Modell aus {{ count(result.model.playlists_used) }} Playlists und
+        {{ count(result.model.tracks_used) }} Songs ({{ count(result.model.genres) }} Genres).
+        Die Prozentwerte sind eine Schätzung des Klassifikators.
+      </p>
+    } @else if (!result.message) {
+      <p class="state">Für diesen Song wurde keine passende Playlist gefunden.</p>
+    }
+  }
+</section>
