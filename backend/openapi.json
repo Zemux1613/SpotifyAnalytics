@@ -250,6 +250,101 @@
         }
       }
     },
+    "/me/listening-insights": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Get Listening Insights",
+        "description": "Heatmap, Discovery Rate und Hörserien aus gespeicherten Hörereignissen.",
+        "operationId": "get_listening_insights_me_listening_insights_get",
+        "parameters": [
+          {
+            "name": "time_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TimeRange",
+              "default": "medium_term"
+            }
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "default": "UTC",
+              "title": "Timezone"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListeningInsightsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playlists": {
       "get": {
         "tags": [
@@ -1123,6 +1218,100 @@
         ],
         "title": "AudioRadarValues"
       },
+      "DiscoveryStats": {
+        "properties": {
+          "tracks_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracks Rate"
+          },
+          "tracks_count": {
+            "type": "integer",
+            "title": "Tracks Count"
+          },
+          "tracks_discovered": {
+            "type": "integer",
+            "title": "Tracks Discovered"
+          },
+          "tracks_previous_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracks Previous Rate"
+          },
+          "tracks_change_pp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracks Change Pp"
+          },
+          "artists_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artists Rate"
+          },
+          "artists_count": {
+            "type": "integer",
+            "title": "Artists Count"
+          },
+          "artists_discovered": {
+            "type": "integer",
+            "title": "Artists Discovered"
+          },
+          "artists_previous_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artists Previous Rate"
+          },
+          "artists_change_pp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artists Change Pp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tracks_count",
+          "tracks_discovered",
+          "artists_count",
+          "artists_discovered"
+        ],
+        "title": "DiscoveryStats"
+      },
       "ErrorResponse": {
         "properties": {
           "detail": {
@@ -1179,6 +1368,118 @@
           "status"
         ],
         "title": "HealthResponse"
+      },
+      "ListeningHeatmapCell": {
+        "properties": {
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday"
+          },
+          "hour": {
+            "type": "integer",
+            "maximum": 23.0,
+            "minimum": 0.0,
+            "title": "Hour"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weekday",
+          "hour",
+          "count"
+        ],
+        "title": "ListeningHeatmapCell"
+      },
+      "ListeningInsightsResponse": {
+        "properties": {
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "sample_size": {
+            "type": "integer",
+            "title": "Sample Size"
+          },
+          "fetched_items": {
+            "type": "integer",
+            "title": "Fetched Items"
+          },
+          "oldest_played_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Played At"
+          },
+          "heatmap": {
+            "items": {
+              "$ref": "#/components/schemas/ListeningHeatmapCell"
+            },
+            "type": "array",
+            "title": "Heatmap"
+          },
+          "discovery": {
+            "$ref": "#/components/schemas/DiscoveryStats"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/ListeningStreak"
+          }
+        },
+        "type": "object",
+        "required": [
+          "time_range",
+          "timezone",
+          "sample_size",
+          "fetched_items",
+          "heatmap",
+          "discovery",
+          "streak"
+        ],
+        "title": "ListeningInsightsResponse"
+      },
+      "ListeningStreak": {
+        "properties": {
+          "current_days": {
+            "type": "integer",
+            "title": "Current Days"
+          },
+          "longest_days": {
+            "type": "integer",
+            "title": "Longest Days"
+          },
+          "tracked_since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracked Since"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_days",
+          "longest_days"
+        ],
+        "title": "ListeningStreak"
       },
       "LogoutResponse": {
         "properties": {

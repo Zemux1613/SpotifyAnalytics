@@ -198,6 +198,47 @@ a.item__title:hover { text-decoration: underline; }
 .genre__bar { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
 .genre__bar span { display: block; height: 100%; background: var(--accent); }
 
+
+.listening-insights, .insight-card {
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+.listening-insights { margin-bottom: 1rem; }
+.section-heading {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.section-heading h2 { margin-bottom: 0.25rem; }
+.heatmap { overflow-x: auto; padding-bottom: 0.25rem; }
+.heatmap__hours, .heatmap__row {
+  display: grid; grid-template-columns: 6.5rem repeat(24, minmax(12px, 1fr));
+  gap: 3px; min-width: 650px;
+}
+.heatmap__hours { margin-bottom: 0.4rem; color: var(--muted); font-size: 0.65rem; text-align: center; }
+.heatmap__row + .heatmap__row { margin-top: 3px; }
+.heatmap__day { align-self: center; color: var(--muted); font-size: 0.75rem; }
+.heatmap__cell, .heatmap__legend-cell {
+  display: block; min-width: 0; height: 18px; border-radius: 3px; background: var(--accent);
+}
+.heatmap__legend { display: flex; justify-content: flex-end; align-items: center; gap: 0.4rem; margin-top: 0.8rem; }
+.heatmap__legend-cell { width: 13px; height: 13px; opacity: 0.15; }
+.heatmap__legend-cell--mid { opacity: 0.5; }
+.heatmap__legend-cell--high { opacity: 1; }
+.insight-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.insight-card h2 { margin-bottom: 1rem; }
+.discovery-stats, .streak-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.discovery-stats > div, .streak-stats > div { display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; min-width: 0; }
+.insight-value { font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.discovery-change { margin-top: 0.25rem; color: var(--muted); font-size: 0.75rem; }
+.streak-stats { margin-bottom: 1rem; }
+@media (max-width: 700px) {
+  .insight-grid { grid-template-columns: 1fr; }
+  .section-heading { align-items: flex-start; flex-direction: column; }
+  .listening-insights, .insight-card { padding: 1rem; }
+}
+
 .note { margin-top: 1.5rem; max-width: 62ch; }
 
 // ---------- Suche ----------

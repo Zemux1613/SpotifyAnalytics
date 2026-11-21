@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 AUTH_URL = "https://accounts.spotify.com/authorize"
 SCOPES = (
     "user-top-read "
+    "user-read-recently-played "
     "playlist-read-private "
     "playlist-read-collaborative "
     "playlist-modify-public "

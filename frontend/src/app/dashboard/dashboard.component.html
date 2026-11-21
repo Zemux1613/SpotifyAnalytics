@@ -39,6 +39,118 @@
       }
     </div>
 
+    <section class="listening-insights" aria-labelledby="listening-patterns">
+      <div class="section-heading">
+        <div>
+          <h2 id="listening-patterns">Wann du Musik hörst</h2>
+          <p class="muted muted--small">Verteilung deiner erfassten Hörereignisse nach Wochentag und Stunde</p>
+        </div>
+        @if (listening(); as data) {
+          <span class="muted muted--small">{{ data.sample_size }} erfasste Hörereignisse</span>
+        }
+      </div>
+
+      @if (listeningLoading()) {
+        <p class="state" aria-live="polite">Deine Hörzeiten werden geladen …</p>
+      } @else if (listeningError(); as message) {
+        <div class="state state--error" role="alert">
+          <p>{{ message }}</p>
+          <p class="muted muted--small">Falls die Berechtigung fehlt: Bitte abmelden und erneut über Spotify
+            anmelden.</p>
+          <button type="button" class="btn btn--ghost" (click)="load()">Erneut versuchen</button>
+        </div>
+      } @else if (listening(); as data) {
+        @if (data.sample_size === 0) {
+          <p class="state">Spotify hat noch keine Hörereignisse geliefert. Spiele ein paar Songs und lade das Dashboard
+            erneut.</p>
+        } @else {
+          <div class="heatmap" role="group" aria-label="Heatmap der Hörzeiten">
+            <div class="heatmap__hours" aria-hidden="true">
+              <span></span>
+              @for (hour of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]; track hour) {
+                <span>{{ hour % 6 === 0 ? hour.toString().padStart(2, '0') : '' }}</span>
+              }
+            </div>
+            @for (day of heatmapRows(); track day.label) {
+              <div class="heatmap__row">
+                <span class="heatmap__day">{{ day.label }}</span>
+                @for (cell of day.cells; track cell.hour) {
+                  <span
+                    class="heatmap__cell"
+                    [style.opacity]="heatOpacity(cell)"
+                    [attr.title]="heatTitle(cell)"
+                    [attr.aria-label]="heatTitle(cell)"
+                  ></span>
+                }
+              </div>
+            }
+            <div class="heatmap__legend muted muted--small">
+              <span>Weniger</span><span class="heatmap__legend-cell"></span><span
+              class="heatmap__legend-cell heatmap__legend-cell--mid"></span><span
+              class="heatmap__legend-cell heatmap__legend-cell--high"></span><span>Mehr</span>
+            </div>
+          </div>
+        }
+      }
+    </section>
+
+    <section class="insight-grid" aria-label="Neuentdeckungen und Hörserie">
+      <article class="insight-card" aria-labelledby="discovery-title">
+        <h2 id="discovery-title">Neuentdeckungen</h2>
+        @if (listeningLoading()) {
+          <p class="state">Wird berechnet …</p>
+        } @else if (listeningError()) {
+          <p class="state muted">Nicht verfügbar</p>
+        } @else if (discovery(); as stats) {
+          <div class="discovery-stats">
+            <div>
+              <span class="stat__label">Neue Songs</span>
+              <strong class="insight-value">{{ formatRate(stats.tracks_rate) }}</strong>
+              <span class="muted muted--small">{{ stats.tracks_discovered }} von {{ stats.tracks_count }} Songs</span>
+              <span class="discovery-change">{{ formatPercentagePoints(stats.tracks_change_pp) }} zur Vorperiode</span>
+            </div>
+            <div>
+              <span class="stat__label">Neue Künstler</span>
+              <strong class="insight-value">{{ formatRate(stats.artists_rate) }}</strong>
+              <span class="muted muted--small">{{ stats.artists_discovered }} von {{ stats.artists_count }}
+                Künstlern</span>
+              <span class="discovery-change">{{ formatPercentagePoints(stats.artists_change_pp) }} zur Vorperiode</span>
+            </div>
+          </div>
+        }
+      </article>
+
+      <article class="insight-card" aria-labelledby="streak-title">
+        <h2 id="streak-title">Deine Hörserie</h2>
+        @if (listeningLoading()) {
+          <p class="state">Wird berechnet …</p>
+        } @else if (listeningError()) {
+          <p class="state muted">Nicht verfügbar</p>
+        } @else if (streak(); as stats) {
+          <div class="streak-stats">
+            <div>
+              <strong class="insight-value">{{ stats.current_days }}</strong>
+              <span class="muted muted--small">Tage aktuelle Serie</span>
+            </div>
+            <div>
+              <strong class="insight-value">{{ stats.longest_days }}</strong>
+              <span class="muted muted--small">Tage längste Serie</span>
+            </div>
+          </div>
+          @if (stats.tracked_since) {
+            <p class="muted muted--small">Erfassung seit {{ stats.tracked_since | date: 'dd.MM.yyyy' }}</p>
+          }
+        }
+      </article>
+    </section>
+
+    <p class="note muted muted--small">
+      Die Hörhistorie wird ab dem ersten Aufruf dieses Dashboards gespeichert. Spotify stellt pro Abruf höchstens 50
+      zuletzt gehörte Tracks bereit; zwischen Dashboard-Aufrufen können deshalb Hörereignisse verloren gehen.
+      Neuentdeckungen bedeuten daher: erstmals in der hier erfassten Historie – nicht zwingend zum allerersten Mal
+      überhaupt gehört. Die Hörserie und der Rekord gelten ebenfalls nur für den erfassten Zeitraum.
+    </p>
+
     <section class="genres" aria-labelledby="top-genres">
       <h2 id="top-genres">Deine Top-Genres</h2>
       @if (genres().length === 0) {
@@ -48,8 +160,8 @@
           @for (genre of genres(); track genre.name) {
             <li class="genre">
               <span class="genre__rank" [class.genre__rank--top]="$index < 3">{{
-                $index + 1
-              }}</span>
+                  $index + 1
+                }}</span>
               <div class="genre__meta">
                 <div class="genre__line">
                   <span class="genre__name">{{ genre.name }}</span>

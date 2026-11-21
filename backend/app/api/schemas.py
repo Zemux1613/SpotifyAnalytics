@@ -10,6 +10,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.domain import TimeRange
+
 
 class ApiModel(BaseModel):
     """Gemeinsame Konfiguration für serialisierbare API-Modelle."""
@@ -194,3 +196,39 @@ API_ERROR_RESPONSES = {
     403: {"model": ErrorResponse, "description": "Fehlende Berechtigung"},
     502: {"model": ErrorResponse, "description": "Spotify nicht erreichbar"},
 }
+
+
+class ListeningHeatmapCell(ApiModel):
+    weekday: int = Field(ge=0, le=6)
+    hour: int = Field(ge=0, le=23)
+    count: int = Field(ge=0)
+
+
+class DiscoveryStats(ApiModel):
+    tracks_rate: float | None = None
+    tracks_count: int
+    tracks_discovered: int
+    tracks_previous_rate: float | None = None
+    tracks_change_pp: float | None = None
+    artists_rate: float | None = None
+    artists_count: int
+    artists_discovered: int
+    artists_previous_rate: float | None = None
+    artists_change_pp: float | None = None
+
+
+class ListeningStreak(ApiModel):
+    current_days: int
+    longest_days: int
+    tracked_since: str | None = None
+
+
+class ListeningInsightsResponse(ApiModel):
+    time_range: TimeRange
+    timezone: str
+    sample_size: int
+    fetched_items: int
+    oldest_played_at: datetime | None = None
+    heatmap: list[ListeningHeatmapCell]
+    discovery: DiscoveryStats
+    streak: ListeningStreak

@@ -2,7 +2,15 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { errorMessage } from '../core/http-error';
 import { pickImage } from '../core/images';
-import { ArtistPagingDto, MeApi, SpotifyArtistDto, SpotifyTrackDto, TimeRangeDto, TopItemTypeDto, TrackPagingDto } from '../api/generated';
+import {
+  ArtistPagingDto,
+  MeApi,
+  SpotifyArtistDto,
+  SpotifyTrackDto,
+  TimeRangeDto,
+  TopItemTypeDto,
+  TrackPagingDto,
+} from '../api/generated';
 import { DurationPipe } from '@shared/duration.pipe';
 
 const RANGES: { value: TimeRangeDto; label: string }[] = [
@@ -45,8 +53,18 @@ export class TopComponent {
     this.error.set(null);
 
     this.subscription = forkJoin({
-      artists: this.api.getTopMeTopItemTypeGet({ itemType: 'artists' as TopItemTypeDto, limit: 25, offset: 0, timeRange: this.range() }),
-      tracks: this.api.getTopMeTopItemTypeGet({ itemType: 'tracks' as TopItemTypeDto, limit: 25, offset: 0, timeRange: this.range() }),
+      artists: this.api.getTopMeTopItemTypeGet({
+        itemType: 'artists' as TopItemTypeDto,
+        limit: 25,
+        offset: 0,
+        timeRange: this.range(),
+      }),
+      tracks: this.api.getTopMeTopItemTypeGet({
+        itemType: 'tracks' as TopItemTypeDto,
+        limit: 25,
+        offset: 0,
+        timeRange: this.range(),
+      }),
     }).subscribe({
       next: ({ artists, tracks }) => {
         this.artists.set((artists as ArtistPagingDto).items);

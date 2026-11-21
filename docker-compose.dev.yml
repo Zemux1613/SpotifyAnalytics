@@ -3,6 +3,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./backend:/app:ro
+      - spotify_data:/app/data
 
   frontend:
     build:
@@ -13,3 +14,6 @@ services:
       - ./frontend:/app
       # node_modules bleibt im container, sonst überdeckt das bind-mount sie mit dem host-ordner
       - /app/node_modules
+
+volumes:
+  spotify_data:

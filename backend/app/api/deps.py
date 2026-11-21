@@ -12,6 +12,7 @@ from app.services.audio_analysis_service import AudioAnalysisService
 from app.services.playlist_service import PlaylistService
 from app.services.recommender_service import RecommenderService
 from app.services.stats_service import StatsService
+from app.services.listening_insights_service import ListeningInsightsService
 from app.services.track_service import TrackService
 from app.services.user_service import UserService
 
@@ -84,3 +85,9 @@ PlaylistServiceDep = Annotated[PlaylistService, Depends(get_playlist_service)]
 RecommenderServiceDep = Annotated[RecommenderService, Depends(get_recommender_service)]
 SessionIdDep = Annotated[str | None, Depends(get_session_id)]
 AccessTokenDep = Annotated[str, Depends(get_access_token)]
+@lru_cache
+def get_listening_insights_service() -> ListeningInsightsService:
+    return ListeningInsightsService(get_spotify_client())
+
+
+ListeningInsightsServiceDep = Annotated[ListeningInsightsService, Depends(get_listening_insights_service)]

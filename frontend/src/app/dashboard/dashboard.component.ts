@@ -1,8 +1,19 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { errorMessage } from '../core/http-error';
-import { ArtistPagingDto, MeApi, SpotifyArtistDto, SpotifyTrackDto, TimeRangeDto, TopItemTypeDto, TrackPagingDto } from '../api/generated';
+import {
+  ArtistPagingDto,
+  MeApi,
+  SpotifyArtistDto,
+  SpotifyTrackDto,
+  TimeRangeDto,
+  TopItemTypeDto,
+  TrackPagingDto,
+} from '../api/generated';
 import { DashboardStats, Metric } from './dashboard.model.component';
+import { ListeningInsightsApi } from './listening-insights.api';
+import { ListeningHeatmapCell, ListeningInsights } from './listening-insights.model';
 
 const RANGES: { value: TimeRangeDto; label: string }[] = [
   { value: 'short_term' as TimeRangeDto, label: 'Letzte 4 Wochen' },
@@ -25,15 +36,41 @@ const RANGE_LABELS = new Map(RANGES.map((r) => [r.value, r.label]));
 @Component({
   selector: 'app-dashboard-page',
   templateUrl: './dashboard.component.html',
+  imports: [DatePipe],
 })
 export class DashboardComponent {
   private readonly api = inject(MeApi);
+  private readonly listeningApi = inject(ListeningInsightsApi);
   private subscription?: Subscription;
+  private listeningSubscription?: Subscription;
 
   protected readonly ranges = RANGES;
-  protected readonly range = signal<TimeRangeDto>('short_term' as TimeRangeDto);
+  protected readonly range = signal<TimeRangeDto>('medium_term' as TimeRangeDto);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly listeningLoading = signal(true);
+  protected readonly listeningError = signal<string | null>(null);
+  protected readonly listening = signal<ListeningInsights | null>(null);
+  protected readonly weekdays = [
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
+    'Sonntag',
+  ];
+  protected readonly heatmapRows = computed(() =>
+    this.weekdays.map((label, weekday) => ({
+      label,
+      cells: (this.listening()?.heatmap ?? []).filter((cell) => cell.weekday === weekday),
+    })),
+  );
+  protected readonly maxHeatCount = computed(() =>
+    Math.max(1, ...(this.listening()?.heatmap ?? []).map((cell) => cell.count)),
+  );
+  protected readonly discovery = computed(() => this.listening()?.discovery ?? null);
+  protected readonly streak = computed(() => this.listening()?.streak ?? null);
 
   private readonly current = signal<DashboardStats | null>(null);
   private readonly baseline = signal<DashboardStats | null>(null);
@@ -66,7 +103,10 @@ export class DashboardComponent {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.subscription?.unsubscribe());
+    inject(DestroyRef).onDestroy(() => {
+      this.subscription?.unsubscribe();
+      this.listeningSubscription?.unsubscribe();
+    });
     this.load();
   }
 
@@ -79,6 +119,8 @@ export class DashboardComponent {
 
   protected load(): void {
     this.subscription?.unsubscribe(); // schnelles Umschalten soll keine alte Antwort anzeigen
+    this.listeningSubscription?.unsubscribe();
+    this.loadListeningInsights();
     this.loading.set(true);
     this.error.set(null);
 
@@ -134,6 +176,39 @@ export class DashboardComponent {
         this.loading.set(false);
       },
     });
+  }
+
+  private loadListeningInsights(): void {
+    this.listeningLoading.set(true);
+    this.listeningError.set(null);
+    this.listeningSubscription = this.listeningApi.get(this.range()).subscribe({
+      next: (result) => {
+        this.listening.set(result);
+        this.listeningLoading.set(false);
+      },
+      error: (err: unknown) => {
+        this.listeningError.set(errorMessage(err));
+        this.listeningLoading.set(false);
+      },
+    });
+  }
+
+  protected heatOpacity(cell: ListeningHeatmapCell): number {
+    return cell.count === 0 ? 0.06 : 0.18 + (cell.count / this.maxHeatCount()) * 0.82;
+  }
+
+  protected heatTitle(cell: ListeningHeatmapCell): string {
+    return `${this.weekdays[cell.weekday]}, ${String(cell.hour).padStart(2, '0')}:00 Uhr – ${cell.count} ${cell.count === 1 ? 'Track' : 'Tracks'}`;
+  }
+
+  protected formatRate(rate: number | null | undefined): string {
+    return rate == null ? '–' : `${rate.toLocaleString('de-DE', { maximumFractionDigits: 1 })} %`;
+  }
+
+  protected formatPercentagePoints(change: number | null | undefined): string {
+    if (change == null) return 'Kein Vergleich';
+    const sign = change > 0 ? '+' : change < 0 ? '−' : '';
+    return `${sign}${Math.abs(change).toLocaleString('de-DE', { maximumFractionDigits: 1 })} Prozentpunkte`;
   }
 
   protected formatValue(value: number): string {
