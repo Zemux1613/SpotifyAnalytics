@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.api.deps import SESSION_COOKIE, AuthServiceDep, SessionIdDep, SettingsDep
+from app.api.schemas import LogoutResponse
 from app.exceptions import SpotifyApiError, SpotifyUnavailableError
 
 logger = logging.getLogger(__name__)
@@ -11,12 +12,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
 
 
-@router.get("/login")
+@router.get("/login", include_in_schema=False)
 def login(auth: AuthServiceDep):
     return RedirectResponse(auth.build_authorize_url())
 
 
-@router.get("/callback")
+@router.get("/callback", include_in_schema=False)
 def callback(
     auth: AuthServiceDep,
     settings: SettingsDep,
@@ -51,9 +52,9 @@ def callback(
     return response
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=LogoutResponse)
 def logout(auth: AuthServiceDep, session_id: SessionIdDep):
     auth.logout(session_id)
-    response = JSONResponse({"status": "ausgeloggt"})
+    response = JSONResponse(LogoutResponse(status="ausgeloggt").model_dump())
     response.delete_cookie(SESSION_COOKIE, path="/")
     return response

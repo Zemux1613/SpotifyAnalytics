@@ -1,8 +1,7 @@
 import { JsonPipe } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { pickImage } from '../../core/images';
-import { TrackDetailsResponse } from '../../core/models';
-import { SpotifyArtist } from '@shared/interfaces/Spotify';
+import { SpotifyArtistDto, TrackDetailsResponseDto } from '../../api/generated';
 import { formatDuration, formatReleaseDate } from '@shared/format';
 
 const ALBUM_TYPES: Record<string, string> = {
@@ -22,7 +21,7 @@ interface Fact {
   templateUrl: './track-details.component.html',
 })
 export class TrackDetailsComponent {
-  readonly data = input.required<TrackDetailsResponse>();
+  readonly data = input.required<TrackDetailsResponseDto>();
 
   protected readonly track = computed(() => this.data().track);
   protected readonly cover = computed(() => pickImage(this.track().album.images, 440));
@@ -53,11 +52,11 @@ export class TrackDetailsComponent {
     return facts;
   });
 
-  protected avatar(artist: SpotifyArtist): string | undefined {
+  protected avatar(artist: SpotifyArtistDto): string | undefined {
     return pickImage(artist.images, 112);
   }
 
-  protected genres(artist: SpotifyArtist): string {
+  protected genres(artist: SpotifyArtistDto): string {
     return (artist.genres ?? []).join(', ');
   }
 }

@@ -1,25 +1,23 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { errorMessage } from '../core/http-error';
-import { TimeRange } from '../core/models';
-import { SpotifyArtist, SpotifyTrack } from '@shared/interfaces/Spotify';
-import { SpotifyApiService } from '@shared/services/spotify-api.service';
+import { ArtistPagingDto, MeApi, SpotifyArtistDto, SpotifyTrackDto, TimeRangeDto, TopItemTypeDto, TrackPagingDto } from '../api/generated';
 import { DashboardStats, Metric } from './dashboard.model.component';
 
-const RANGES: { value: TimeRange; label: string }[] = [
-  { value: 'short_term', label: 'Letzte 4 Wochen' },
-  { value: 'medium_term', label: 'Letzte 6 Monate' },
-  { value: 'long_term', label: 'Letztes Jahr' },
+const RANGES: { value: TimeRangeDto; label: string }[] = [
+  { value: 'short_term' as TimeRangeDto, label: 'Letzte 4 Wochen' },
+  { value: 'medium_term' as TimeRangeDto, label: 'Letzte 6 Monate' },
+  { value: 'long_term' as TimeRangeDto, label: 'Letztes Jahr' },
 ];
 
 /**
  * Spotify liefert keine echten Stream-Zahlen oder Hörhistorien.
  * Deshalb vergleichen wir den gewählten Zeitraum mit einem Referenzzeitraum.
  */
-const REFERENCE: Record<TimeRange, TimeRange | null> = {
-  short_term: 'medium_term',
-  medium_term: 'long_term',
-  long_term: 'medium_term',
+const REFERENCE: Record<TimeRangeDto, TimeRangeDto | null> = {
+  ['short_term' as TimeRangeDto]: 'medium_term' as TimeRangeDto,
+  ['medium_term' as TimeRangeDto]: 'long_term' as TimeRangeDto,
+  ['long_term' as TimeRangeDto]: 'medium_term' as TimeRangeDto,
 };
 
 const RANGE_LABELS = new Map(RANGES.map((r) => [r.value, r.label]));
@@ -29,11 +27,11 @@ const RANGE_LABELS = new Map(RANGES.map((r) => [r.value, r.label]));
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
-  private readonly api = inject(SpotifyApiService);
+  private readonly api = inject(MeApi);
   private subscription?: Subscription;
 
   protected readonly ranges = RANGES;
-  protected readonly range = signal<TimeRange>('medium_term');
+  protected readonly range = signal<TimeRangeDto>('medium_term' as TimeRangeDto);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
@@ -72,7 +70,7 @@ export class DashboardComponent {
     this.load();
   }
 
-  protected select(range: TimeRange): void {
+  protected select(range: TimeRangeDto): void {
     if (range !== this.range()) {
       this.range.set(range);
       this.load();
@@ -88,16 +86,16 @@ export class DashboardComponent {
     const reference = REFERENCE[range];
 
     this.subscription = forkJoin({
-      tracks: this.api.topTracks(range, 50),
-      artists: this.api.topArtists(range, 50),
-      referenceTracks: reference ? this.api.topTracks(reference, 50) : of(null),
-      referenceArtists: reference ? this.api.topArtists(reference, 50) : of(null),
+      tracks: this.api.getTopMeTopItemTypeGet('tracks' as TopItemTypeDto, 50, 0, range),
+      artists: this.api.getTopMeTopItemTypeGet('artists' as TopItemTypeDto, 50, 0, range),
+      referenceTracks: reference ? this.api.getTopMeTopItemTypeGet('tracks' as TopItemTypeDto, 50, 0, reference) : of(null),
+      referenceArtists: reference ? this.api.getTopMeTopItemTypeGet('artists' as TopItemTypeDto, 50, 0, reference) : of(null),
     }).subscribe({
       next: ({ tracks, artists, referenceTracks, referenceArtists }) => {
-        this.current.set(computeStats(tracks.items, artists.items));
+        this.current.set(computeStats((tracks as TrackPagingDto).items, (artists as ArtistPagingDto).items));
         this.baseline.set(
           referenceTracks && referenceArtists
-            ? computeStats(referenceTracks.items, referenceArtists.items)
+            ? computeStats((referenceTracks as TrackPagingDto).items, (referenceArtists as ArtistPagingDto).items)
             : null,
         );
         this.loading.set(false);
@@ -143,7 +141,7 @@ export class DashboardComponent {
   }
 }
 
-function computeStats(tracks: SpotifyTrack[], artists: SpotifyArtist[]): DashboardStats {
+function computeStats(tracks: SpotifyTrackDto[], artists: SpotifyArtistDto[]): DashboardStats {
   const durations = tracks.reduce((sum, track) => sum + track.duration_ms, 0);
 
   // Spotify hat keinen Stream-Zähler. Wir gewichten die Top-Tracks mit ihrem

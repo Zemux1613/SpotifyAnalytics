@@ -1,24 +1,23 @@
 import { Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { errorMessage } from '../../core/http-error';
-import { SpotifyTrack } from '@shared/interfaces/Spotify';
-import { PlaylistSuggestion, PlaylistSuggestionsResponse } from '@shared/interfaces/Playlist';
-import { SpotifyApiService } from '@shared/services/spotify-api.service';
+import { PlaylistSuggestionDto, PlaylistSuggestionsResponseDto, SpotifyTrackDto, TracksApi, PlaylistsApi } from '../../api/generated';
 
 @Component({
   selector: 'app-playlist-suggestions',
   templateUrl: './playlist-suggestions.component.html',
 })
 export class PlaylistSuggestionsComponent {
-  private readonly api = inject(SpotifyApiService);
+  private readonly tracksApi = inject(TracksApi);
+  private readonly playlistsApi = inject(PlaylistsApi);
   private suggestionsSub?: Subscription;
   private addSub?: Subscription;
 
-  readonly track = input.required<SpotifyTrack>();
+  readonly track = input.required<SpotifyTrackDto>();
 
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly response = signal<PlaylistSuggestionsResponse | null>(null);
+  protected readonly response = signal<PlaylistSuggestionsResponseDto | null>(null);
   protected readonly addingId = signal<string | null>(null);
   protected readonly addedIds = signal<ReadonlySet<string>>(new Set());
   protected readonly addErrors = signal<Readonly<Record<string, string>>>({});
@@ -39,7 +38,7 @@ export class PlaylistSuggestionsComponent {
     this.load(this.track().id, true);
   }
 
-  protected add(suggestion: PlaylistSuggestion): void {
+  protected add(suggestion: PlaylistSuggestionDto): void {
     if (this.addingId() || this.isAdded(suggestion)) {
       return;
     }
@@ -47,7 +46,7 @@ export class PlaylistSuggestionsComponent {
     this.addingId.set(suggestion.playlist_id);
     this.clearAddError(suggestion.playlist_id);
 
-    this.addSub = this.api.addTrackToPlaylist(suggestion.playlist_id, this.track().uri).subscribe({
+    this.addSub = this.playlistsApi.addTrackToPlaylistPlaylistsPlaylistIdTracksPost(suggestion.playlist_id, { track_uri: this.track().uri }).subscribe({
       next: () => {
         this.addedIds.set(new Set([...this.addedIds(), suggestion.playlist_id]));
         this.addingId.set(null);
@@ -59,7 +58,7 @@ export class PlaylistSuggestionsComponent {
     });
   }
 
-  protected isAdded(suggestion: PlaylistSuggestion): boolean {
+  protected isAdded(suggestion: PlaylistSuggestionDto): boolean {
     return suggestion.already_in_playlist || this.addedIds().has(suggestion.playlist_id);
   }
 
@@ -80,7 +79,7 @@ export class PlaylistSuggestionsComponent {
     this.addErrors.set({});
     this.addingId.set(null);
 
-    this.suggestionsSub = this.api.playlistSuggestions(trackId, refresh).subscribe({
+    this.suggestionsSub = this.tracksApi.playlistSuggestionsTracksTrackIdPlaylistSuggestionsGet(trackId, refresh).subscribe({
       next: (response) => {
         this.response.set(response);
         this.loading.set(false);

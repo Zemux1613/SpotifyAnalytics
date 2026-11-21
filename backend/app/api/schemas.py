@@ -1,0 +1,171 @@
+"""Pydantic-Modelle bilden den öffentlichen HTTP-API-Vertrag.
+
+Die Spotify-Antworten werden bewusst auf die Felder reduziert, die unsere API
+an das Frontend weitergibt. Dadurch bleiben OpenAPI und die generierten
+Angular-DTOs unabhängig von Änderungen an nicht verwendeten Spotify-Feldern.
+"""
+
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class ApiModel(BaseModel):
+    """Gemeinsame Konfiguration für serialisierbare API-Modelle."""
+
+    model_config = ConfigDict(extra="ignore")
+
+
+class ErrorResponse(ApiModel):
+    detail: str
+
+
+class HealthResponse(ApiModel):
+    status: Literal["ok"]
+
+
+class LogoutResponse(ApiModel):
+    status: Literal["ausgeloggt"]
+
+
+class ExternalUrls(ApiModel):
+    spotify: str | None = None
+
+
+class SpotifyExternalIds(ApiModel):
+    isrc: str | None = None
+
+
+class SpotifyImage(ApiModel):
+    url: str
+    width: int | None = None
+    height: int | None = None
+
+
+class ArtistRef(ApiModel):
+    id: str
+    name: str
+    uri: str
+    external_urls: ExternalUrls | None = None
+
+
+class SpotifyArtist(ArtistRef):
+    genres: list[str] = Field(default_factory=list)
+    images: list[SpotifyImage] = Field(default_factory=list)
+
+
+class SpotifyAlbum(ApiModel):
+    id: str
+    name: str
+    album_type: str
+    total_tracks: int
+    release_date: str
+    release_date_precision: str
+    images: list[SpotifyImage] = Field(default_factory=list)
+    artists: list[ArtistRef] = Field(default_factory=list)
+    external_urls: ExternalUrls | None = None
+
+
+class SpotifyTrack(ApiModel):
+    id: str
+    name: str
+    uri: str
+    duration_ms: int
+    popularity: int
+    explicit: bool
+    track_number: int
+    disc_number: int
+    is_playable: bool | None = None
+    artists: list[ArtistRef] = Field(default_factory=list)
+    album: SpotifyAlbum
+    external_ids: SpotifyExternalIds | None = None
+    external_urls: ExternalUrls | None = None
+
+
+class Paging(ApiModel):
+    total: int
+    limit: int
+    offset: int
+    next: str | None = None
+    previous: str | None = None
+
+
+class TrackPaging(Paging):
+    items: list[SpotifyTrack]
+
+
+class ArtistPaging(Paging):
+    items: list[SpotifyArtist]
+
+
+class TrackSearchResponse(ApiModel):
+    tracks: TrackPaging
+
+
+class TrackDetailsResponse(ApiModel):
+    track: SpotifyTrack
+    artists: list[SpotifyArtist]
+
+
+class UserProfile(ApiModel):
+    id: str
+    display_name: str | None = None
+    images: list[SpotifyImage] = Field(default_factory=list)
+
+
+class PlaylistSummary(ApiModel):
+    id: str
+    name: str
+    owner: str | None = None
+    track_count: int
+    image_url: str | None = None
+    spotify_url: str | None = None
+    collaborative: bool = False
+    public: bool | None = None
+
+
+class PlaylistSuggestion(ApiModel):
+    playlist_id: str
+    name: str
+    image_url: str | None = None
+    spotify_url: str | None = None
+    track_count: int
+    match_percent: int = Field(ge=0, le=100)
+    method: Literal["random_forest", "genre_fallback"]
+    already_in_playlist: bool
+    top_genres: list[str] = Field(default_factory=list)
+
+
+class ModelInfo(ApiModel):
+    playlists_used: int
+    playlists_trained: int
+    playlists_total: int
+    tracks_used: int
+    genres: int
+    trained_at: datetime
+    cached: bool
+
+
+class PlaylistSuggestionsResponse(ApiModel):
+    track_id: str
+    suggestions: list[PlaylistSuggestion]
+    model: ModelInfo
+    message: str | None = None
+
+
+class AddTrackRequest(ApiModel):
+    track_uri: str = Field(min_length=1, max_length=200)
+
+
+class AddTrackResponse(ApiModel):
+    status: Literal["hinzugefügt"]
+    snapshot_id: str | None = None
+
+
+API_ERROR_RESPONSES = {
+    400: {"model": ErrorResponse, "description": "Ungültige Anfrage"},
+    401: {"model": ErrorResponse, "description": "Nicht authentifiziert"},
+    403: {"model": ErrorResponse, "description": "Fehlende Berechtigung"},
+    502: {"model": ErrorResponse, "description": "Spotify nicht erreichbar"},
+}

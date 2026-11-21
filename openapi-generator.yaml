@@ -1,0 +1,8 @@
+# Optionen für den OpenAPI Generator (typescript-angular).
+providedInRoot: true
+serviceSuffix: Api
+modelSuffix: Dto
+withInterfaces: true
+stringEnums: true
+enumUnknownDefaultCase: true
+useSingleRequestParameter: true

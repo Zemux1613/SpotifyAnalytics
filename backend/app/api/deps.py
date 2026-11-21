@@ -54,7 +54,7 @@ def get_recommender_service() -> RecommenderService:
 
 
 def get_session_id(
-    session_id: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
+    session_id: Annotated[str | None, Cookie(alias=SESSION_COOKIE, include_in_schema=False)] = None,
 ) -> str | None:
     return session_id
 

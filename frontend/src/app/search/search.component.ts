@@ -2,9 +2,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { errorMessage } from '../core/http-error';
 import { pickImage } from '../core/images';
-import { TrackDetailsResponse } from '../core/models';
-import { SpotifyTrack } from '@shared/interfaces/Spotify';
-import { SpotifyApiService } from '@shared/services/spotify-api.service';
+import { SpotifyTrackDto, TrackDetailsResponseDto, TracksApi } from '../api/generated';
 import { PlaylistSuggestionsComponent } from './playlist-suggestions/playlist-suggestions.component';
 import { TrackDetailsComponent } from './track-details/track-details.component';
 
@@ -14,19 +12,19 @@ import { TrackDetailsComponent } from './track-details/track-details.component';
   templateUrl: './search.component.html',
 })
 export class SearchComponent {
-  private readonly api = inject(SpotifyApiService);
+  private readonly api = inject(TracksApi);
   private searchSub?: Subscription;
   private detailsSub?: Subscription;
 
   protected readonly query = signal('');
   protected readonly lastQuery = signal('');
   /** null: es wurde noch nicht gesucht */
-  protected readonly results = signal<SpotifyTrack[] | null>(null);
+  protected readonly results = signal<SpotifyTrackDto[] | null>(null);
   protected readonly searching = signal(false);
   protected readonly searchError = signal<string | null>(null);
 
   protected readonly selectedId = signal<string | null>(null);
-  protected readonly details = signal<TrackDetailsResponse | null>(null);
+  protected readonly details = signal<TrackDetailsResponseDto | null>(null);
   protected readonly loadingDetails = signal(false);
   protected readonly detailsError = signal<string | null>(null);
 
@@ -60,7 +58,7 @@ export class SearchComponent {
     this.detailsError.set(null);
     this.loadingDetails.set(false);
 
-    this.searchSub = this.api.searchTracks(query).subscribe({
+    this.searchSub = this.api.searchTracksTracksSearchGet(query, 10).subscribe({
       next: (response) => {
         const items = response.tracks.items.filter((track) => !!track);
         this.results.set(items);
@@ -76,14 +74,14 @@ export class SearchComponent {
     });
   }
 
-  protected select(track: SpotifyTrack): void {
+  protected select(track: SpotifyTrackDto): void {
     this.detailsSub?.unsubscribe();
     this.selectedId.set(track.id);
     this.details.set(null);
     this.detailsError.set(null);
     this.loadingDetails.set(true);
 
-    this.detailsSub = this.api.trackDetails(track.id).subscribe({
+    this.detailsSub = this.api.getTrackTracksTrackIdGet(track.id).subscribe({
       next: (details) => {
         this.details.set(details);
         this.loadingDetails.set(false);
@@ -95,7 +93,7 @@ export class SearchComponent {
     });
   }
 
-  protected artistNames(track: SpotifyTrack): string {
+  protected artistNames(track: SpotifyTrackDto): string {
     return track.artists.map((a) => a.name).join(', ');
   }
 }

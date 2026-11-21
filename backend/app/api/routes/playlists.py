@@ -1,8 +1,12 @@
 from typing import Any
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
-
+from app.api.schemas import (
+    API_ERROR_RESPONSES,
+    AddTrackRequest,
+    AddTrackResponse,
+    PlaylistSummary,
+)
 from app.api.deps import (
     AccessTokenDep,
     PlaylistServiceDep,
@@ -13,15 +17,15 @@ from app.api.deps import (
 router = APIRouter(prefix="/playlists", tags=["playlists"])
 
 
-class AddTrackRequest(BaseModel):
-    track_uri: str = Field(min_length=1, max_length=200)
-
-
-@router.get("")
+@router.get(
+    "",
+    response_model=list[PlaylistSummary],
+    responses=API_ERROR_RESPONSES,
+)
 def list_playlists(
     playlists: PlaylistServiceDep,
     token: AccessTokenDep,
-) -> list[dict[str, Any]]:
+) -> list[PlaylistSummary]:
     """Die Playlists des Users (Basis für das Empfehlungsmodell)."""
     items = playlists.list_playlists(token)
     return [
@@ -41,14 +45,18 @@ def list_playlists(
     ]
 
 
-@router.post("/{playlist_id}/tracks")
+@router.post(
+    "/{playlist_id}/tracks",
+    response_model=AddTrackResponse,
+    responses=API_ERROR_RESPONSES,
+)
 def add_track_to_playlist(
     playlist_id: str,
     body: AddTrackRequest,
     recommender: RecommenderServiceDep,
     token: AccessTokenDep,
     session_id: SessionIdDep,
-) -> dict[str, Any]:
+) -> AddTrackResponse:
     """One-Click-Add: fügt den Track zur Playlist hinzu (POST /playlists/{id}/tracks)."""
     return recommender.add_track(token, session_id, playlist_id, body.track_uri)
 

@@ -2,15 +2,13 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { errorMessage } from '../core/http-error';
 import { pickImage } from '../core/images';
-import { TimeRange } from '../core/models';
-import { SpotifyArtist, SpotifyTrack } from '@shared/interfaces/Spotify';
-import { SpotifyApiService } from '@shared/services/spotify-api.service';
+import { ArtistPagingDto, MeApi, SpotifyArtistDto, SpotifyTrackDto, TimeRangeDto, TopItemTypeDto, TrackPagingDto } from '../api/generated';
 import { DurationPipe } from '@shared/duration.pipe';
 
-const RANGES: { value: TimeRange; label: string }[] = [
-  { value: 'short_term', label: 'Letzte 4 Wochen' },
-  { value: 'medium_term', label: 'Letzte 6 Monate' },
-  { value: 'long_term', label: 'Letztes Jahr' },
+const RANGES: { value: TimeRangeDto; label: string }[] = [
+  { value: 'short_term' as TimeRangeDto, label: 'Letzte 4 Wochen' },
+  { value: 'medium_term' as TimeRangeDto, label: 'Letzte 6 Monate' },
+  { value: 'long_term' as TimeRangeDto, label: 'Letztes Jahr' },
 ];
 
 @Component({
@@ -19,13 +17,13 @@ const RANGES: { value: TimeRange; label: string }[] = [
   templateUrl: './top.page.html',
 })
 export class TopPage {
-  private readonly api = inject(SpotifyApiService);
+  private readonly api = inject(MeApi);
   private subscription?: Subscription;
 
   protected readonly ranges = RANGES;
-  protected readonly range = signal<TimeRange>('medium_term');
-  protected readonly artists = signal<SpotifyArtist[]>([]);
-  protected readonly tracks = signal<SpotifyTrack[]>([]);
+  protected readonly range = signal<TimeRangeDto>('medium_term' as TimeRangeDto);
+  protected readonly artists = signal<SpotifyArtistDto[]>([]);
+  protected readonly tracks = signal<SpotifyTrackDto[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
@@ -34,7 +32,7 @@ export class TopPage {
     this.load();
   }
 
-  protected select(range: TimeRange): void {
+  protected select(range: TimeRangeDto): void {
     if (range !== this.range()) {
       this.range.set(range);
       this.load();
@@ -47,12 +45,12 @@ export class TopPage {
     this.error.set(null);
 
     this.subscription = forkJoin({
-      artists: this.api.topArtists(this.range()),
-      tracks: this.api.topTracks(this.range()),
+      artists: this.api.getTopMeTopItemTypeGet('artists' as TopItemTypeDto, 10, 0, this.range()),
+      tracks: this.api.getTopMeTopItemTypeGet('tracks' as TopItemTypeDto, 10, 0, this.range()),
     }).subscribe({
       next: ({ artists, tracks }) => {
-        this.artists.set(artists.items);
-        this.tracks.set(tracks.items);
+        this.artists.set((artists as ArtistPagingDto).items);
+        this.tracks.set((tracks as TrackPagingDto).items);
         this.loading.set(false);
       },
       error: (err: unknown) => {
@@ -64,11 +62,11 @@ export class TopPage {
 
   protected image = pickImage;
 
-  protected genres(artist: SpotifyArtist): string {
+  protected genres(artist: SpotifyArtistDto): string {
     return (artist.genres ?? []).slice(0, 3).join(', ');
   }
 
-  protected artistNames(track: SpotifyTrack): string {
+  protected artistNames(track: SpotifyTrackDto): string {
     return track.artists.map((a) => a.name).join(', ');
   }
 }

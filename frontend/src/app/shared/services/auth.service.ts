@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, of, tap } from 'rxjs';
-import { UserProfile } from '../../core/models';
+import { AuthApi, MeApi, UserProfileDto } from '../../api/generated';
 
 /**
  * Hält den Login-Zustand. Die eigentliche Session liegt als HttpOnly-Cookie im Browser,
@@ -10,18 +9,19 @@ import { UserProfile } from '../../core/models';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
+  private readonly authApi = inject(AuthApi);
+  private readonly meApi = inject(MeApi);
   private readonly router = inject(Router);
 
-  readonly user = signal<UserProfile | null>(null);
+  readonly user = signal<UserProfileDto | null>(null);
 
   /** Liefert das Profil des eingeloggten Users oder null, wenn keine gültige Session besteht. */
-  loadUser(): Observable<UserProfile | null> {
+  loadUser(): Observable<UserProfileDto | null> {
     const current = this.user();
     if (current) {
       return of(current);
     }
-    return this.http.get<UserProfile>('/api/me').pipe(
+    return this.meApi.getProfileMeGet().pipe(
       tap((user) => this.user.set(user)),
       catchError(() => of(null)),
     );
@@ -33,8 +33,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http
-      .post('/api/logout', {})
+    this.authApi.logoutLogoutPost()
       .pipe(catchError(() => of(null)))
       .subscribe(() => {
         this.user.set(null);
