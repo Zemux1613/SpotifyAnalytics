@@ -37,7 +37,8 @@ class SpotifyClient:
             headers={"Authorization": f"Bearer {access_token}"},
             params=params,
         )
-        return resp.json()
+        # einige GET-Endpunkte antworten mit 204 ohne Body (z. B. aktueller Track)
+        return resp.json() if resp.content else {}
 
     def post(
         self, endpoint: str, access_token: str, payload: dict[str, Any]

@@ -1,0 +1,50 @@
+@if (inspector.current(); as track) {
+  <div
+    class="inspector-backdrop"
+    [class.inspector-backdrop--open]="inspector.isOpen()"
+    aria-hidden="true"
+    (click)="inspector.close()"
+  ></div>
+
+  <aside
+    class="inspector"
+    [class.inspector--open]="inspector.isOpen()"
+    [attr.aria-hidden]="!inspector.isOpen()"
+    [attr.inert]="inspector.isOpen() ? null : ''"
+    aria-label="Track-Inspector"
+  >
+    <header class="inspector__head">
+      <div class="inspector__heading">
+        <p class="inspector__eyebrow">Track-Inspector</p>
+        <h2 [title]="track.name">{{ track.name }}</h2>
+        @if (track.artists) {
+          <p class="muted">{{ track.artists }}</p>
+        }
+      </div>
+      <button
+        type="button"
+        class="inspector__close"
+        aria-label="Track-Inspector schließen"
+        (click)="inspector.close()"
+      >
+        ✕
+      </button>
+    </header>
+
+    <div class="inspector__body">
+      @if (inspector.error(); as message) {
+        <div class="state state--error" role="alert">
+          <p>{{ message }}</p>
+          <button type="button" class="btn btn--ghost" (click)="inspector.show(track)">
+            Erneut versuchen
+          </button>
+        </div>
+      } @else if (inspector.loading()) {
+        <p class="state" aria-live="polite">Track-Details werden geladen …</p>
+      } @else if (inspector.details(); as details) {
+        <app-track-details [data]="details" [compact]="true" />
+        <app-playlist-suggestions [track]="details.track" />
+      }
+    </div>
+  </aside>
+}

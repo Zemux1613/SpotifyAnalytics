@@ -97,7 +97,13 @@
           <ol class="rank-list">
             @for (track of visibleTracks(); track track.id) {
               <li>
-                <a class="item" [class.item--podium]="$index < 3" [href]="track.external_urls?.spotify" target="_blank" rel="noopener">
+                <button
+                  type="button"
+                  class="item item--button"
+                  [class.item--podium]="$index < 3"
+                  [attr.aria-current]="track.id === inspector.currentId()"
+                  (click)="inspect(track)"
+                >
                   <span class="rank" [class.rank--top]="$index < 3">{{ $index + 1 }}</span>
 
                   @if (image(track.album.images, 112); as src) {
@@ -112,8 +118,8 @@
                   </div>
 
                   <span class="item__aside muted">{{ track.duration_ms | duration }}</span>
-                  <span class="item__ext" aria-hidden="true">↗</span>
-                </a>
+                  <span class="item__ext" aria-hidden="true">Details →</span>
+                </button>
               </li>
             }
           </ol>

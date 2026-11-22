@@ -1,4 +1,4 @@
-<article class="details">
+<article class="details" [class.details--compact]="compact()">
   <header class="details__head">
     @if (cover(); as src) {
       <img class="details__cover" [src]="src" alt="Albumcover von {{ track().album.name }}" width="220" height="220">
@@ -73,7 +73,7 @@
   </section>
 
   @if (data().artists.length) {
-    <section class="details__section">
+    <section class="details__section details__artists-section">
       <h3>{{ data().artists.length === 1 ? 'Künstler' : 'Künstler:innen' }}</h3>
       <ul class="artist-rows">
         @for (artist of data().artists; track artist.id) {

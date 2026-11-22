@@ -15,3 +15,35 @@
 .details__section { margin-top: 1.5rem; }
 .details__section h3 { margin-bottom: 0.5rem; }
 .artist-rows .avatar { width: 48px; height: 48px; }
+
+// Kompakte Variante für den globalen Inspector-Drawer
+.details--compact {
+  padding: 0;
+  background: transparent;
+
+  .details__head {
+    margin-bottom: 1rem;
+    gap: 1rem;
+  }
+
+  .details__cover {
+    width: 96px;
+    height: 96px;
+  }
+
+  .details__title h2 {
+    font-size: 1.35rem;
+  }
+
+  .facts,
+  .raw,
+  .details__artists-section {
+    display: none;
+  }
+
+  .details__section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+}

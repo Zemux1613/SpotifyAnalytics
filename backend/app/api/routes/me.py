@@ -4,6 +4,7 @@ from app.api.deps import (
     AccessTokenDep,
     ListeningInsightsServiceDep,
     StatsServiceDep,
+    TrackServiceDep,
     UserServiceDep,
 )
 from app.domain import TimeRange, TopItemType
@@ -11,6 +12,7 @@ from app.api.schemas import (
     API_ERROR_RESPONSES,
     ArtistPaging,
     ListeningInsightsResponse,
+    NowPlayingResponse,
     TrackPaging,
     UserProfile,
 )
@@ -23,6 +25,20 @@ router = APIRouter(prefix="/me", tags=["me"])
 def get_profile(user: UserServiceDep, token: AccessTokenDep) -> UserProfile:
     """Profil des eingeloggten Users. Dient dem Frontend auch als Login-Check (401 = nicht eingeloggt)."""
     return user.get_profile(token)
+
+
+@router.get(
+    "/now-playing",
+    response_model=NowPlayingResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_now_playing",
+)
+def get_now_playing(
+    tracks: TrackServiceDep,
+    token: AccessTokenDep,
+) -> NowPlayingResponse:
+    """Aktuell auf Spotify laufender Track – Basis für die Now-Playing-Leiste."""
+    return tracks.get_now_playing(token)
 
 
 @router.get(

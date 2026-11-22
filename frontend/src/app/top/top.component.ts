@@ -12,6 +12,7 @@ import {
   TrackPagingDto,
 } from '../api/generated';
 import { DurationPipe } from '@shared/duration.pipe';
+import { InspectorService } from '@shared/services/inspector.service';
 
 const RANGES: { value: TimeRangeDto; label: string }[] = [
   { value: 'short_term' as TimeRangeDto, label: 'Letzte 4 Wochen' },
@@ -28,6 +29,8 @@ const RANGES: { value: TimeRangeDto; label: string }[] = [
 export class TopComponent {
   private readonly api = inject(MeApi);
   private subscription?: Subscription;
+
+  protected readonly inspector = inject(InspectorService);
 
   protected readonly ranges = RANGES;
   protected readonly range = signal<TimeRangeDto>('medium_term' as TimeRangeDto);
@@ -97,5 +100,9 @@ export class TopComponent {
 
   protected artistNames(track: SpotifyTrackDto): string {
     return (track.artists ?? []).map((a) => a.name).join(', ');
+  }
+
+  protected inspect(track: SpotifyTrackDto): void {
+    this.inspector.showTrack(track);
   }
 }

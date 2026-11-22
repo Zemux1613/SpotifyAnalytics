@@ -1,7 +1,7 @@
 import { Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { errorMessage } from '../../core/http-error';
-import { PlaylistSuggestionDto, PlaylistSuggestionsResponseDto, SpotifyTrackDto, TracksApi, PlaylistsApi } from '../../api/generated';
+import { errorMessage } from '../../../core/http-error';
+import { PlaylistSuggestionDto, PlaylistSuggestionsResponseDto, SpotifyTrackDto, TracksApi, PlaylistsApi } from '../../../api/generated';
 
 @Component({
   selector: 'app-playlist-suggestions',

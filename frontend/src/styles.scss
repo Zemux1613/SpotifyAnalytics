@@ -13,6 +13,9 @@
   --danger: #ff8a98;
   --radius-s: 4px;
   --radius-m: 10px;
+  --topbar-h: 3.4rem;
+  --now-playing-h: 4.75rem;
+  --inspector-w: clamp(360px, 32vw, 500px);
   color-scheme: dark;
 }
 
@@ -90,6 +93,15 @@ h3 { font-size: 1.05rem; }
 .user__name { font-weight: 600; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 // ---------- Seiten ----------
+main {
+  transition: padding 0.24s ease;
+}
+main.main--now-playing { padding-bottom: var(--now-playing-h); }
+main.main--inspector { padding-right: calc(var(--inspector-w) + 1rem); }
+@media (max-width: 1100px) {
+  main.main--inspector { padding-right: 0; }
+}
+
 .page { max-width: 1120px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 .page__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
 

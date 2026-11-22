@@ -283,6 +283,23 @@ class PlaylistsOverviewResponse(BaseModel):
     model_trained: bool
 
 
+class NowPlayingTrack(ApiModel):
+    id: str
+    name: str
+    uri: str
+    duration_ms: int
+    artists: list[ArtistRef] = Field(default_factory=list)
+    album_name: str | None = None
+    image_url: str | None = None
+    spotify_url: str | None = None
+
+
+class NowPlayingResponse(ApiModel):
+    is_playing: bool = False
+    progress_ms: int | None = None
+    track: NowPlayingTrack | None = None
+
+
 class PlaylistTrackItem(ApiModel):
     id: str
     name: str

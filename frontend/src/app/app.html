@@ -18,6 +18,14 @@
     </div>
   </header>
 }
-<main>
+<main
+  [class.main--inspector]="auth.user() && inspector.isOpen()"
+  [class.main--now-playing]="auth.user() && inspector.current()"
+>
   <router-outlet />
 </main>
+
+@if (auth.user()) {
+  <app-inspector />
+  <app-now-playing />
+}

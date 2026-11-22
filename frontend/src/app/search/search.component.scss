@@ -7,52 +7,36 @@
 .search-form input::placeholder { color: var(--muted); }
 .search-form input:focus-visible { outline-offset: 0; border-color: var(--accent); }
 
-.search-layout { display: grid; gap: 2rem; grid-template-columns: 1fr; align-items: start; }
-@media (min-width: 900px) { .search-layout { grid-template-columns: 340px 1fr; } }
-.search-layout__details { min-width: 0; }
-@media (min-width: 900px) { .search-layout__details { align-self: start; } }
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
 
-.results { display: flex; flex-direction: column; gap: 0.25rem; }
 .result {
   display: flex; align-items: center; gap: 0.8rem; width: 100%;
   padding: 0.6rem 0.7rem; border: 0; border-left: 3px solid transparent; border-radius: var(--radius-s);
   background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
 }
 .result:hover { background: var(--surface); }
+.result:hover .result__open { opacity: 1; transform: translateX(0); }
 .result[aria-current='true'] { background: var(--surface-2); border-left-color: var(--accent); }
 .result .cover-s { width: 48px; height: 48px; }
 
-.page:has(.track-layout) {
-  max-width: 1440px;
+.result__open {
+  flex: none;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s, transform 0.15s;
 }
 
-.track-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (min-width: 1180px) {
-  .track-layout {
-    // Links flexibler Hauptbereich, rechts Playlist-Vorschläge (320px–380px)
-    grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
-  }
-}
-
-.details-left,
-.suggestions-right {
-  display: block;
-  min-width: 0;
-}
-
-// Entfernt den oberen Abstand der Playlist-Box, wenn sie rechts neben den Details steht
-.track-layout .matches {
-  margin-top: 0;
-}
-
-.page > h1 { 
-  margin-bottom: 1.5rem; 
+.page > h1 {
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 

@@ -37,6 +37,22 @@
   }
 }
 
+.item--button {
+  width: calc(100% + 1.3rem);
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &[aria-current='true'] {
+    background: var(--surface-2);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+}
+
 li:last-child .item {
   border-bottom: 0;
 }

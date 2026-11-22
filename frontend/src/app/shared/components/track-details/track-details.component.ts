@@ -1,8 +1,8 @@
 import { DecimalPipe, JsonPipe } from '@angular/common';
 import { Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import {Observable, Subscription, switchMap, takeWhile, timer } from 'rxjs';
-import { pickImage } from '../../core/images';
-import { AudioAnalysisResponseDto, SpotifyArtistDto, TrackDetailsResponseDto, TracksApi } from '../../api/generated';
+import { pickImage } from '../../../core/images';
+import { AudioAnalysisResponseDto, SpotifyArtistDto, TrackDetailsResponseDto, TracksApi } from '../../../api/generated';
 import { formatDuration, formatReleaseDate } from '@shared/format';
 import { Fact, ALBUM_TYPES } from './track-details.models'
 
@@ -17,6 +17,7 @@ export class TrackDetailsComponent {
   private analysisSub?: Subscription;
 
   readonly data = input.required<TrackDetailsResponseDto>();
+  readonly compact = input(false);
 
   protected readonly track = computed(() => this.data().track);
   protected readonly audioAnalysis = signal<AudioAnalysisResponseDto | null>(null);

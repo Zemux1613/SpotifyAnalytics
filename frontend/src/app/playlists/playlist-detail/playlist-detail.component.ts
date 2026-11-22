@@ -5,6 +5,7 @@ import { PlaylistDetailResponseDto, PlaylistTrackItemDto } from '../../api/gener
 import { PlaylistsApi } from '../../api/generated/api/playlists.service';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { errorMessage } from '../../core/http-error';
+import { InspectorService } from '@shared/services/inspector.service';
 
 @Component({
   selector: 'app-playlist-detail',
@@ -16,6 +17,8 @@ import { errorMessage } from '../../core/http-error';
 export class PlaylistDetailComponent implements OnInit {
   private readonly playlistsApi = inject(PlaylistsApi);
   private readonly route = inject(ActivatedRoute);
+
+  protected readonly inspector = inject(InspectorService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -60,6 +63,10 @@ export class PlaylistDetailComponent implements OnInit {
 
   artistNames(track: PlaylistTrackItemDto): string {
     return (track.artists ?? []).map((artist) => artist.name).join(', ');
+  }
+
+  inspect(track: PlaylistTrackItemDto): void {
+    this.inspector.showPlaylistTrack(track);
   }
 
   formatTotalDuration(ms: number): string {

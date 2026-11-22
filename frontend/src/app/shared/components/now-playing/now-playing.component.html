@@ -1,0 +1,59 @@
+@if (auth.user() && playback.displayTrack(); as track) {
+  <div class="now-playing" role="region" aria-label="Now Playing">
+    <div class="now-playing__inner">
+      <button
+        type="button"
+        class="now-playing__main"
+        [attr.aria-expanded]="inspector.isOpen()"
+        (click)="inspector.isOpen() ? inspector.close() : openInspector()"
+      >
+        @if (track.imageUrl) {
+          <img class="now-playing__cover" [src]="track.imageUrl" alt="" width="48" height="48" />
+        } @else {
+          <span class="now-playing__cover now-playing__cover--empty" aria-hidden="true"></span>
+        }
+
+        <span
+          class="now-playing__pulse"
+          [class.now-playing__pulse--paused]="!playback.isPlaying() || playback.isPinned()"
+          aria-hidden="true"
+        >
+          <span></span><span></span><span></span>
+        </span>
+
+        <span class="now-playing__text">
+          <span class="now-playing__label">
+            @if (playback.isPinned()) {
+              Ausgewählt
+            } @else if (playback.isPlaying()) {
+              Now Playing
+            } @else {
+              Pausiert
+            }
+          </span>
+          <span class="now-playing__title">{{ track.name }}</span>
+          @if (track.artists) {
+            <span class="now-playing__artists">{{ track.artists }}</span>
+          }
+        </span>
+
+        <span class="now-playing__hint">
+          {{ inspector.isOpen() ? 'Inspector schließen' : 'Radar & Playlists öffnen' }}
+          <span class="now-playing__chevron" [class.now-playing__chevron--up]="inspector.isOpen()">↑</span>
+        </span>
+      </button>
+
+      @if (playback.isPinned()) {
+        <button
+          type="button"
+          class="now-playing__dismiss"
+          aria-label="Auswahl aufheben und Spotify-Wiedergabe anzeigen"
+          title="Auswahl aufheben"
+          (click)="dismissSelection()"
+        >
+          ✕
+        </button>
+      }
+    </div>
+  </div>
+}

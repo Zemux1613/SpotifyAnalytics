@@ -55,31 +55,33 @@
 
         <ol class="track-rows">
           @for (track of tracks(); track $index) {
-            <li class="track-row">
-              <span class="track-row__index">{{ $index + 1 }}</span>
+            <li>
+              <button
+                type="button"
+                class="track-row"
+                [attr.aria-current]="track.id === inspector.currentId()"
+                (click)="inspect(track)"
+              >
+                <span class="track-row__index">{{ $index + 1 }}</span>
 
-              @if (track.image_url) {
-                <img class="track-row__cover" [src]="track.image_url" alt="" width="44" height="44" loading="lazy" />
-              } @else {
-                <span class="track-row__cover track-row__cover--empty" aria-hidden="true"></span>
-              }
-
-              <div class="track-row__text">
-                @if (track.spotify_url) {
-                  <a class="track-row__title" [href]="track.spotify_url" target="_blank" rel="noopener noreferrer">
-                    {{ track.name }}
-                  </a>
+                @if (track.image_url) {
+                  <img class="track-row__cover" [src]="track.image_url" alt="" width="44" height="44" loading="lazy" />
                 } @else {
-                  <span class="track-row__title">{{ track.name }}</span>
+                  <span class="track-row__cover track-row__cover--empty" aria-hidden="true"></span>
                 }
-                <span class="muted muted--small">{{ artistNames(track) }}</span>
-              </div>
 
-              @if (track.album_name) {
-                <span class="track-row__album muted muted--small">{{ track.album_name }}</span>
-              }
+                <div class="track-row__text">
+                  <span class="track-row__title">{{ track.name }}</span>
+                  <span class="muted muted--small">{{ artistNames(track) }}</span>
+                </div>
 
-              <span class="track-row__duration muted muted--small">{{ track.duration_ms | duration }}</span>
+                @if (track.album_name) {
+                  <span class="track-row__album muted muted--small">{{ track.album_name }}</span>
+                }
+
+                <span class="track-row__duration muted muted--small">{{ track.duration_ms | duration }}</span>
+                <span class="track-row__open" aria-hidden="true">Details →</span>
+              </button>
             </li>
           }
         </ol>
