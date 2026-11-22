@@ -160,9 +160,6 @@ export class DashboardComponent {
   protected readonly bpmUnavailable = computed(
     () => this.bpmTracks().filter((t) => t.status === 'unavailable').length,
   );
-  protected readonly bpmTodo = computed(
-    () => this.bpmTracks().filter((t) => t.status === 'not_started' || t.status === 'failed').length,
-  );
   protected readonly formatBpm = (value: number) => `${Math.round(value)} BPM`;
 
   // ---------- KPI: Modell-Status ----------
@@ -308,7 +305,10 @@ export class DashboardComponent {
       next: (summary) => {
         this.bpmTracks.set(summary.tracks);
         this.bpmLoading.set(false);
-        if (summary.tracks.some(isPending)) this.watchBpm(); // z. B. nach Neuladen während Analyse
+        // Fehlende Analysen starten automatisch; laufende werden nur weiterverfolgt (z. B. nach Neuladen).
+        const todo = summary.tracks.filter((t) => t.status === 'not_started').map((t) => t.track_id);
+        if (todo.length > 0) this.startAnalysis(todo);
+        else if (summary.tracks.some(isPending)) this.watchBpm();
       },
       error: (err: unknown) => {
         this.bpmError.set(errorMessage(err));
@@ -336,10 +336,7 @@ export class DashboardComponent {
       });
   }
 
-  protected analyseTopTracks(): void {
-    const todo = this.bpmTracks()
-      .filter((t) => t.status === 'not_started' || t.status === 'failed')
-      .map((t) => t.track_id);
+  private startAnalysis(todo: string[]): void {
     if (todo.length === 0 || this.bpmRunning()) return;
 
     this.bpmError.set(null);
@@ -363,6 +360,8 @@ export class DashboardComponent {
       next: (status) => {
         this.modelStatus.set(status);
         this.modelLoading.set(false);
+        // Kein (oder abgelaufenes) Modell: automatisch trainieren
+        if (!status.trained) this.trainModel();
       },
       error: (err: unknown) => {
         this.modelError.set(errorMessage(err));

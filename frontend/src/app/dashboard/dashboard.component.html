@@ -162,11 +162,6 @@
         @if (bpmError(); as message) {
           <p class="card__state card__state--error" role="alert">{{ message }}</p>
         }
-        @if (bpmTodo() > 0) {
-          <button type="button" class="btn btn--ghost" [disabled]="bpmRunning()" (click)="analyseTopTracks()">
-            {{ bpmValues().length === 0 ? 'Top-Tracks analysieren' : 'Rest analysieren' }}
-          </button>
-        }
       }
     </article>
 
@@ -174,7 +169,9 @@
     <article class="card card--3" aria-labelledby="kpi-model">
       <div class="card__head">
         <h2 class="card__label" id="kpi-model">Modell-Status</h2>
-        @if (!modelLoading() && !modelError()) {
+        @if (modelTraining()) {
+          <span class="pill pill--busy">Training läuft</span>
+        } @else if (!modelLoading() && !modelError()) {
           @switch (modelState()) {
             @case ('ready') {
               <span class="pill pill--ok">Bereit</span>
@@ -207,16 +204,22 @@
           } @else {
             <p class="kpi">–</p>
             <p class="card__state">
-              Das Modell wird beim ersten Playlist-Vorschlag trainiert, oder du startest es hier.
+              @if (modelTraining()) {
+                Das Modell wird gerade automatisch trainiert …
+              } @else {
+                Noch kein Modell vorhanden.
+              }
             </p>
           }
         }
         @if (modelError(); as message) {
           <p class="card__state card__state--error" role="alert">{{ message }}</p>
         }
-        <button type="button" class="btn btn--ghost" [disabled]="modelTraining()" (click)="trainModel()">
-          {{ modelTraining() ? 'Training läuft …' : modelStatus()?.trained ? 'Neu trainieren' : 'Modell trainieren' }}
-        </button>
+        @if (modelError()) {
+          <button type="button" class="btn btn--ghost" [disabled]="modelTraining()" (click)="trainModel()">
+            Erneut versuchen
+          </button>
+        }
       }
     </article>
 
