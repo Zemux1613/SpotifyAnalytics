@@ -128,6 +128,7 @@
 }
 
 .playlist-card {
+  position: relative;
   grid-column: span 4;
   display: flex;
   flex-direction: column;
@@ -143,6 +144,21 @@
   &:hover {
     border-color: var(--rank-dim);
   }
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  }
+}
+
+// Deckt die ganze Karte ab und öffnet die Detailansicht. Interaktive
+// Elemente darunter (Genre-Buttons) bekommen einen höheren z-index.
+.playlist-card__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--radius-m);
 }
 
 @media (max-width: 960px) {
@@ -340,6 +356,8 @@
 
 // Klickbare Genre-Zeilen in den Cards
 .genre-btn {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   padding: 0.25rem 0.4rem;

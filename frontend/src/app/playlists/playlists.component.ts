@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { PlaylistOverviewItemDto } from '../api/generated';
 import { PlaylistsApi } from '../api/generated/api/playlists.service'
 
@@ -9,7 +10,7 @@ export type PlaylistSortOption = 'default' | 'tracks_desc' | 'name_asc' | 'train
 @Component({
   selector: 'app-playlists',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './playlists.component.html',
   styleUrl: './playlists.component.scss',
 })

@@ -28,6 +28,15 @@ export const routes: Routes = [
     loadComponent: () => import('./search/search.component').then((m) => m.SearchComponent),
   },
   { path: 'playlists', component: PlaylistsComponent, canActivate: [authGuard] },
+  {
+    path: 'playlists/:id',
+    title: 'Playlist | SpotifyAnalytics',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./playlists/playlist-detail/playlist-detail.component').then(
+        (m) => m.PlaylistDetailComponent,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },
 ];

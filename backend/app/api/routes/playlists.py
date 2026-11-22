@@ -7,6 +7,7 @@ from app.api.schemas import (
     AddTrackRequest,
     AddTrackResponse,
     ModelStatusResponse,
+    PlaylistDetailResponse,
     PlaylistSummary,
     PlaylistsOverviewResponse
 )
@@ -133,3 +134,18 @@ def get_playlists_overview(
         model_trained=model_trained,
         include_followed=include_followed,
     )
+
+
+@router.get(
+    "/{playlist_id}",
+    response_model=PlaylistDetailResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_playlist_detail",
+)
+def get_playlist_detail(
+    playlist_id: str,
+    playlists: PlaylistServiceDep,
+    token: AccessTokenDep,
+) -> PlaylistDetailResponse:
+    """Playlist-Details inkl. aller Songs für die Detailansicht."""
+    return playlists.get_playlist_detail(token, playlist_id)

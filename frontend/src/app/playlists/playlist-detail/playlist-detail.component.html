@@ -1,0 +1,89 @@
+<section class="page">
+  <a class="back-link" routerLink="/playlists">← Zurück zu den Playlists</a>
+
+  @if (loading()) {
+    <p class="state" aria-live="polite">Lade Playlist…</p>
+  } @else if (error()) {
+    <div class="state state--error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" class="btn" (click)="retry()">Erneut versuchen</button>
+    </div>
+  } @else if (playlist(); as pl) {
+    <header class="playlist-hero">
+      @if (pl.image_url) {
+        <img class="playlist-hero__cover" [src]="pl.image_url" [alt]="pl.name" />
+      } @else {
+        <div class="playlist-hero__cover playlist-hero__cover--empty" aria-hidden="true"></div>
+      }
+
+      <div class="playlist-hero__meta">
+        <p class="playlist-hero__eyebrow">Playlist</p>
+        <h1>{{ pl.name }}</h1>
+
+        <p class="muted playlist-hero__line">
+          @if (pl.owner_name) {
+            <span>{{ pl.owner_name }}</span>
+            <span aria-hidden="true">·</span>
+          }
+          <span>{{ tracks().length }} {{ tracks().length === 1 ? 'Song' : 'Songs' }}</span>
+          @if (formatTotalDuration(totalDurationMs()); as duration) {
+            <span aria-hidden="true">·</span>
+            <span>{{ duration }}</span>
+          }
+        </p>
+
+        @if (pl.description) {
+          <p class="playlist-hero__description">{{ pl.description }}</p>
+        }
+
+        @if (pl.spotify_url) {
+          <a class="btn btn--ghost playlist-hero__spotify" [href]="pl.spotify_url" target="_blank" rel="noopener noreferrer">
+            In Spotify öffnen ↗
+          </a>
+        }
+      </div>
+    </header>
+
+    @if (tracks().length === 0) {
+      <p class="state">Diese Playlist enthält noch keine abspielbaren Songs.</p>
+    } @else {
+      <div class="card track-list">
+        <div class="track-list__head">
+          <h2>Songs</h2>
+          <span class="muted muted--small">{{ tracks().length }} Einträge</span>
+        </div>
+
+        <ol class="track-rows">
+          @for (track of tracks(); track $index) {
+            <li class="track-row">
+              <span class="track-row__index">{{ $index + 1 }}</span>
+
+              @if (track.image_url) {
+                <img class="track-row__cover" [src]="track.image_url" alt="" width="44" height="44" loading="lazy" />
+              } @else {
+                <span class="track-row__cover track-row__cover--empty" aria-hidden="true"></span>
+              }
+
+              <div class="track-row__text">
+                @if (track.spotify_url) {
+                  <a class="track-row__title" [href]="track.spotify_url" target="_blank" rel="noopener noreferrer">
+                    {{ track.name }}
+                  </a>
+                } @else {
+                  <span class="track-row__title">{{ track.name }}</span>
+                }
+                <span class="muted muted--small">{{ artistNames(track) }}</span>
+              </div>
+
+              @if (track.album_name) {
+                <span class="track-row__album muted muted--small">{{ track.album_name }}</span>
+              }
+
+              <span class="track-row__duration muted muted--small">{{ track.duration_ms | duration }}</span>
+            </li>
+          }
+        </ol>
+      </div>
+    }
+  }
+</section>

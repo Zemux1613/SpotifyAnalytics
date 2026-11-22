@@ -3,7 +3,14 @@ from collections.abc import Iterable
 from typing import Any
 
 from app.clients.spotify_client import SpotifyClient
-from app.api.schemas import PlaylistGenreItem, PlaylistOverviewItem, PlaylistsOverviewResponse
+from app.api.schemas import (
+    ArtistRef,
+    PlaylistDetailResponse,
+    PlaylistGenreItem,
+    PlaylistOverviewItem,
+    PlaylistTrackItem,
+    PlaylistsOverviewResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +69,69 @@ class PlaylistService:
                 break
             offset += len(batch)
         return tracks
+
+    def get_playlist_detail(
+        self, access_token: str, playlist_id: str
+    ) -> PlaylistDetailResponse:
+        """Playlist inkl. Songliste für die Detailansicht im Frontend."""
+        playlist = self._client.get(f"/playlists/{playlist_id}", access_token)
+        images = playlist.get("images") or []
+        owner = playlist.get("owner") or {}
+
+        tracks: list[PlaylistTrackItem] = []
+        offset = 0
+        while True:
+            page = self._client.get(
+                f"/playlists/{playlist_id}/tracks",
+                access_token,
+                limit=100,
+                offset=offset,
+            )
+            batch = page.get("items") or []
+            for item in batch:
+                track = item.get("track") or {}
+                if track.get("is_local") or not track.get("id"):
+                    continue
+
+                album = track.get("album") or {}
+                album_images = album.get("images") or []
+                artists = [
+                    ArtistRef(
+                        id=artist["id"],
+                        name=artist.get("name") or "",
+                        uri=artist.get("uri") or "",
+                        external_urls=artist.get("external_urls"),
+                    )
+                    for artist in track.get("artists") or []
+                    if artist.get("id")
+                ]
+                tracks.append(
+                    PlaylistTrackItem(
+                        id=track["id"],
+                        name=track.get("name") or "",
+                        uri=track.get("uri") or f"spotify:track:{track['id']}",
+                        duration_ms=track.get("duration_ms") or 0,
+                        artists=artists,
+                        album_name=album.get("name"),
+                        image_url=album_images[0]["url"] if album_images else None,
+                        spotify_url=(track.get("external_urls") or {}).get("spotify"),
+                        added_at=item.get("added_at"),
+                    )
+                )
+            if not page.get("next") or not batch:
+                break
+            offset += len(batch)
+
+        return PlaylistDetailResponse(
+            id=playlist.get("id") or playlist_id,
+            name=playlist.get("name") or "",
+            description=playlist.get("description"),
+            image_url=images[0]["url"] if images else None,
+            spotify_url=(playlist.get("external_urls") or {}).get("spotify"),
+            owner_name=owner.get("display_name") or owner.get("id"),
+            track_count=(playlist.get("tracks") or {}).get("total") or len(tracks),
+            tracks=tracks,
+        )
 
     def get_artists(
         self, access_token: str, artist_ids: Iterable[str]

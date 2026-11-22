@@ -281,3 +281,26 @@ class PlaylistOverviewItem(BaseModel):
 class PlaylistsOverviewResponse(BaseModel):
     items: list[PlaylistOverviewItem]
     model_trained: bool
+
+
+class PlaylistTrackItem(ApiModel):
+    id: str
+    name: str
+    uri: str
+    duration_ms: int
+    artists: list[ArtistRef] = Field(default_factory=list)
+    album_name: str | None = None
+    image_url: str | None = None
+    spotify_url: str | None = None
+    added_at: str | None = None
+
+
+class PlaylistDetailResponse(ApiModel):
+    id: str
+    name: str
+    description: str | None = None
+    image_url: str | None = None
+    spotify_url: str | None = None
+    owner_name: str | None = None
+    track_count: int
+    tracks: list[PlaylistTrackItem] = Field(default_factory=list)

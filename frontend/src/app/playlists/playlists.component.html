@@ -87,6 +87,12 @@
     <div class="bento">
       @for (pl of filteredItems(); track pl.id) {
         <article class="playlist-card">
+          <a
+            class="playlist-card__overlay"
+            [routerLink]="['/playlists', pl.id]"
+            [attr.aria-label]="'Playlist ' + pl.name + ' öffnen'"
+          ></a>
+
           <div class="playlist-card__head">
             <div class="cover-wrap">
               @if (pl.image_url) {
@@ -98,19 +104,7 @@
 
             <div class="playlist-card__meta">
               <div class="playlist-card__title-row">
-                @if (pl.spotify_url) {
-                  <a
-                    class="item__title"
-                    [href]="pl.spotify_url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    [title]="pl.name"
-                  >
-                    {{ pl.name }}
-                  </a>
-                } @else {
-                  <span class="item__title" [title]="pl.name">{{ pl.name }}</span>
-                }
+                <span class="item__title" [title]="pl.name">{{ pl.name }}</span>
 
                 <span
                   class="status-dot"
