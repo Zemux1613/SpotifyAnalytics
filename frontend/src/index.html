@@ -5,8 +5,16 @@
   <title>SpotifyAnalytics</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    (function () {
+      const saved = localStorage.getItem('theme');
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const theme = saved === 'light' || saved === 'dark' ? saved : (prefersLight ? 'light' : 'dark');
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

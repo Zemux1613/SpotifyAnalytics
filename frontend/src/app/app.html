@@ -9,6 +9,20 @@
         <a routerLink="/playlists" routerLinkActive="active">Playlists</a>
       </nav>
       <div class="user">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="themeService.toggle()"
+          [attr.aria-label]="themeService.theme() === 'dark' ? 'Zum Light Mode wechseln' : 'Zum Dark Mode wechseln'"
+          [title]="themeService.theme() === 'dark' ? 'Light Mode aktivieren' : 'Dark Mode aktivieren'"
+        >
+          @if (themeService.theme() === 'dark') {
+            <span aria-hidden="true">☀️</span>
+          } @else {
+            <span aria-hidden="true">🌙</span>
+          }
+        </button>
+
         @if (avatar(); as src) {
           <img class="user__avatar" [src]="src" alt="" width="32" height="32">
         }

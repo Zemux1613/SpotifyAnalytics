@@ -1,6 +1,8 @@
 // Design-Tokens: Pflaume als Grund, Safran als einzige Akzentfarbe.
 // Der Akzent steht für Aktion und Rang, alles andere bleibt ruhig.
-:root {
+// Standard: Dark Mode (Pflaume & Safran)
+:root,
+:root[data-theme='dark'] {
   --bg: #1a1523;
   --surface: #241c31;
   --surface-2: #2e2440;
@@ -17,6 +19,21 @@
   --now-playing-h: 4.75rem;
   --inspector-w: clamp(360px, 32vw, 500px);
   color-scheme: dark;
+}
+
+// Light Mode (Helles Alabaster-Flieder & tiefes Safran/Bernstein)
+:root[data-theme='light'] {
+  --bg: #f8f6fb;
+  --surface: #ffffff;
+  --surface-2: #efeaf6;
+  --line: #dcd3e8;
+  --text: #1c1526;
+  --muted: #615475;
+  --rank-dim: #9587aa;
+  --accent: #d98200;
+  --accent-ink: #ffffff;
+  --danger: #c92a3e;
+  color-scheme: light;
 }
 
 *,
