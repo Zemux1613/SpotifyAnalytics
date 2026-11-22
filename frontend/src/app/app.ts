@@ -12,6 +12,7 @@ import { NowPlayingComponent } from './shared/components/now-playing/now-playing
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, InspectorComponent, NowPlayingComponent],
   templateUrl: './app.html',
+  styleUrl: './app.scss'
 })
 export class App {
   protected readonly auth = inject(AuthService);
