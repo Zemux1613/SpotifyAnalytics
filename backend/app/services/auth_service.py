@@ -16,6 +16,7 @@ AUTH_URL = "https://accounts.spotify.com/authorize"
 SCOPES = (
     "user-top-read "
     "user-read-recently-played "
+    "user-library-read "
     "user-read-playback-state "
     "user-read-currently-playing "
     "playlist-read-private "

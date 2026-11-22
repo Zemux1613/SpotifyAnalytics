@@ -25,6 +25,8 @@
         </button>
       </div>
 
+      <button type="button" class="btn" (click)="openTriage()">Triage starten</button>
+
       <label class="visually-hidden" for="playlist-sort">Sortierung</label>
       <select
         id="playlist-sort"
@@ -92,6 +94,22 @@
             [routerLink]="['/playlists', pl.id]"
             [attr.aria-label]="'Playlist ' + pl.name + ' öffnen'"
           ></a>
+
+          <label
+            class="compare-check"
+            [class.compare-check--on]="isSelected(pl.id)"
+            [class.compare-check--locked]="selectionLocked(pl.id)"
+            [title]="selectionLocked(pl.id) ? 'Es können nur zwei Playlists verglichen werden' : 'Für den Vergleich auswählen'"
+          >
+            <input
+              type="checkbox"
+              [checked]="isSelected(pl.id)"
+              [disabled]="selectionLocked(pl.id)"
+              (change)="toggleSelected(pl.id)"
+            />
+            <span class="visually-hidden">{{ pl.name }} vergleichen</span>
+            <span aria-hidden="true">Vergleichen</span>
+          </label>
 
           <div class="playlist-card__head">
             <div class="cover-wrap">
@@ -175,5 +193,26 @@
         </article>
       }
     </div>
+  }
+
+  @if (selectedItems().length > 0) {
+    <div class="compare-bar" role="region" aria-label="Playlist-Vergleich">
+      <span>
+        <strong>{{ selectedItems().length }}/2</strong> ausgewählt
+        @if (!compareReady()) {
+          <span class="muted"> – wähle eine weitere Playlist</span>
+        }
+      </span>
+      <button type="button" class="btn" [disabled]="!compareReady()" (click)="openCompare()">Vergleichen</button>
+      <button type="button" class="btn btn--ghost" (click)="clearSelection()">Auswahl löschen</button>
+    </div>
+  }
+
+  @if (triageOpen()) {
+    <app-triage (closed)="closeTriage($event)" />
+  }
+
+  @if (compareOpen() && selectedItems().length === 2) {
+    <app-playlist-compare [a]="selectedItems()[0]" [b]="selectedItems()[1]" (closed)="compareOpen.set(false)" />
   }
 </section>

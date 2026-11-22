@@ -164,6 +164,14 @@ class PlaylistSummary(ApiModel):
     public: bool | None = None
 
 
+class PlaylistSuggestionReason(ApiModel):
+    """Ein nachvollziehbarer Grund, warum ein Song zu einer Playlist passt."""
+
+    key: Literal["genre", "artist", "bpm", "mood", "era"]
+    label: str
+    detail: str | None = None
+
+
 class PlaylistSuggestion(ApiModel):
     playlist_id: str
     name: str
@@ -174,6 +182,7 @@ class PlaylistSuggestion(ApiModel):
     method: Literal["random_forest", "genre_fallback"]
     already_in_playlist: bool
     top_genres: list[str] = Field(default_factory=list)
+    reasons: list[PlaylistSuggestionReason] = Field(default_factory=list)
 
 
 class ModelInfo(ApiModel):
@@ -197,6 +206,8 @@ class PlaylistSuggestionsResponse(ApiModel):
     suggestions: list[PlaylistSuggestion]
     model: ModelInfo
     message: str | None = None
+    # False, solange für den Song noch keine Audio-Analyse vorliegt (BPM-/Stimmungs-Gründe fehlen dann)
+    audio_ready: bool = False
 
 
 class AddTrackRequest(ApiModel):
@@ -277,10 +288,19 @@ class PlaylistOverviewItem(BaseModel):
     avg_release_year: int | None = None
     avg_bpm: float | None = None
     dominant_mood: str | None = None
+    avg_radar: AudioRadarValues | None = None
 
 class PlaylistsOverviewResponse(BaseModel):
     items: list[PlaylistOverviewItem]
     model_trained: bool
+
+
+class UnsortedTracksResponse(ApiModel):
+    """Lieblingssongs, die in keiner deiner bearbeitbaren Playlists liegen."""
+
+    tracks: list[SpotifyTrack]
+    total_unsorted: int
+    scanned: int
 
 
 class NowPlayingTrack(ApiModel):

@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  --radar-a: var(--accent);
+  --radar-b: #7cc8ff;
+}
+svg { display: block; width: 100%; max-width: 320px; margin: 0 auto; overflow: visible; }
+text { fill: var(--muted); font-size: 10px; }
+.grid { fill: none; stroke: var(--line); stroke-width: 1; }
+.axis { stroke: var(--line); stroke-width: 1; }
+.value {
+  fill: color-mix(in srgb, var(--radar-a) 26%, transparent);
+  stroke: var(--radar-a);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.value--b {
+  fill: color-mix(in srgb, var(--radar-b) 22%, transparent);
+  stroke: var(--radar-b);
+}

@@ -9,7 +9,8 @@ from app.api.schemas import (
     ModelStatusResponse,
     PlaylistDetailResponse,
     PlaylistSummary,
-    PlaylistsOverviewResponse
+    PlaylistsOverviewResponse,
+    UnsortedTracksResponse,
 )
 from app.api.deps import (
     AccessTokenDep,
@@ -125,6 +126,7 @@ def get_playlists_overview(
         avg_bpm, dominant_mood = audio.playlist_vibe(m.get("track_ids") or [])
         m["avg_bpm"] = avg_bpm
         m["dominant_mood"] = dominant_mood
+        m["avg_radar"] = audio.playlist_radar(m.get("track_ids") or [])
 
     return playlists.get_playlists_overview(
         access_token=token,
@@ -134,6 +136,22 @@ def get_playlists_overview(
         model_trained=model_trained,
         include_followed=include_followed,
     )
+
+
+@router.get(
+    "/unsorted-tracks",
+    response_model=UnsortedTracksResponse,
+    responses=API_ERROR_RESPONSES,
+    operation_id="get_unsorted_tracks",
+)
+def get_unsorted_tracks(
+    recommender: RecommenderServiceDep,
+    token: AccessTokenDep,
+    session_id: SessionIdDep,
+    limit: int = Query(default=50, ge=1, le=200, description="Maximale Anzahl Songs in der Triage-Queue"),
+) -> UnsortedTracksResponse:
+    """Lieblingssongs, die noch in keiner deiner Playlists liegen (Queue für den Triage-Modus)."""
+    return recommender.get_unsorted_tracks(token, session_id, limit)
 
 
 @router.get(

@@ -58,6 +58,7 @@ def playlist_suggestions(
     track_id: str,
     tracks: TrackServiceDep,
     recommender: RecommenderServiceDep,
+    analysis: AudioAnalysisServiceDep,
     token: AccessTokenDep,
     session_id: SessionIdDep,
     refresh: bool = Query(False),
@@ -74,6 +75,7 @@ def playlist_suggestions(
         details["track"],
         details["artists"],
         refresh=refresh,
+        audio=analysis,
     )
 
 

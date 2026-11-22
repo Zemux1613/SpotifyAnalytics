@@ -132,6 +132,33 @@ class AudioAnalysisService:
         dominant_mood = moods.most_common(1)[0][0] if moods else None
         return avg_bpm, dominant_mood
 
+    def playlist_radar(self, track_ids: Iterable[str]) -> AudioRadarValues | None:
+        """Ø-Radarwerte über alle bereits analysierten Tracks einer Playlist."""
+        vectors: list[list[float]] = []
+        with self._lock:
+            for tid in track_ids:
+                vector = self._feature_vectors.get(tid)
+                job = self._jobs.get(tid)
+                if vector and job and job.status == "completed":
+                    vectors.append(vector)
+        if not vectors:
+            return None
+        tempo, brightness, rhythm, texture = np.mean(np.asarray(vectors, dtype=float), axis=0)
+        return AudioRadarValues(
+            tempo=round(float(tempo), 1),
+            brightness=round(float(brightness), 1),
+            rhythm=round(float(rhythm), 1),
+            texture=round(float(texture), 1),
+        )
+
+    def track_vibe(self, track_id: str) -> tuple[float | None, str | None]:
+        """BPM und Stimmung eines Tracks, falls die Analyse bereits abgeschlossen ist."""
+        with self._lock:
+            job = self._jobs.get(track_id)
+            if job and job.status == "completed" and job.features:
+                return job.features.tempo_bpm, job.features.mood
+        return None, None
+
     def get_status(self, track_id: str) -> AudioAnalysisResponse:
         with self._lock:
             return self._jobs.get(

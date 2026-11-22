@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.exceptions import (
     InvalidRequestError,
+    MissingLibraryScopeError,
     MissingPlaylistScopeError,
     NotAuthenticatedError,
     SpotifyApiError,
@@ -39,6 +40,18 @@ def register_exception_handlers(app: FastAPI) -> None:
             content={
                 "detail": (
                     "Für Playlist-Vorschläge fehlt die Spotify-Berechtigung. "
+                    "Bitte abmelden und erneut anmelden."
+                )
+            },
+        )
+
+    @app.exception_handler(MissingLibraryScopeError)
+    async def missing_library_scope(request: Request, exc: MissingLibraryScopeError):
+        return JSONResponse(
+            status_code=403,
+            content={
+                "detail": (
+                    "Für den Triage-Modus fehlt die Berechtigung auf deine Lieblingssongs. "
                     "Bitte abmelden und erneut anmelden."
                 )
             },

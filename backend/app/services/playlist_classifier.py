@@ -25,6 +25,7 @@ MIN_POSITIVES = 3
 MIN_NEGATIVES = 5
 MAX_SUGGESTIONS = 8
 RANDOM_STATE = 42
+ERA_TOLERANCE_YEARS = 3
 ALBUM_TYPES = ("album", "single", "compilation")
 
 
@@ -42,6 +43,7 @@ class TrainedPlaylist:
     genre_counts: list[tuple[str, int]] = field(default_factory=list)
     duration_ms: int = 0
     avg_release_year: int | None = None
+    artist_ids: set[str] = field(default_factory=set)
 
 
 def _artist_objects(
@@ -190,6 +192,12 @@ class PlaylistClassifier:
             total_duration_ms = sum(int(t.get("duration_ms") or 0) for t in playlist_tracks)
             years = [y for t in playlist_tracks if (y := _release_year(t)) > 0]
             avg_year = round(sum(years) / len(years)) if years else None
+            artist_ids = {
+                ref["id"]
+                for t in playlist_tracks
+                for ref in t.get("artists") or []
+                if ref.get("id")
+            }
 
             self._trained.append(
                 TrainedPlaylist(
@@ -205,6 +213,7 @@ class PlaylistClassifier:
                     genre_counts=genre_profile.most_common(5),
                     duration_ms=total_duration_ms,
                     avg_release_year=avg_year,
+                    artist_ids=artist_ids,
                 )
             )
 
@@ -272,6 +281,7 @@ class PlaylistClassifier:
         genres = _genres(_artist_objects(track, self._artist_map, fallback))
         vector = self._vector(track, genres, fallback)
         track_id = track.get("id")
+        track_artist_ids = {ref["id"] for ref in track.get("artists") or [] if ref.get("id")}
 
         suggestions: list[dict[str, Any]] = []
         for playlist in self._trained:
@@ -294,11 +304,51 @@ class PlaylistClassifier:
                     "method": method,
                     "already_in_playlist": track_id in playlist.track_ids,
                     "top_genres": playlist.top_genres,
+                    "reasons": self._reasons(playlist, track, track_artist_ids, genres),
                 }
             )
 
         suggestions.sort(key=lambda item: (-item["match_percent"], item["name"].lower()))
         return suggestions[:limit]
+
+    def all_track_ids(self) -> set[str]:
+        """Alle Track-IDs, die in mindestens einer trainierten Playlist liegen."""
+        known: set[str] = set()
+        for playlist in self._trained:
+            known |= playlist.track_ids
+        return known
+
+    @staticmethod
+    def _reasons(
+        playlist: TrainedPlaylist,
+        track: dict[str, Any],
+        track_artist_ids: set[str],
+        genres: set[str],
+    ) -> list[dict[str, Any]]:
+        """Nachvollziehbare Gründe für die Passung (ohne Audio, das ergänzt der Recommender)."""
+        reasons: list[dict[str, Any]] = []
+
+        shared_genres = [name for name, _ in playlist.genre_counts if name in genres]
+        if shared_genres:
+            reasons.append(
+                {"key": "genre", "label": "Genre-Match", "detail": ", ".join(shared_genres[:3])}
+            )
+
+        if track_artist_ids & playlist.artist_ids:
+            reasons.append(
+                {"key": "artist", "label": "Künstler bekannt", "detail": "Der Künstler ist schon in der Playlist"}
+            )
+
+        year = _release_year(track)
+        if year and playlist.avg_release_year and abs(year - playlist.avg_release_year) <= ERA_TOLERANCE_YEARS:
+            reasons.append(
+                {
+                    "key": "era",
+                    "label": "Ähnliche Ära",
+                    "detail": f"{year} vs. Ø {playlist.avg_release_year}",
+                }
+            )
+        return reasons
 
     def mark_added(self, playlist_id: str, track_id: str) -> None:
         """Hält den Cache aktuell, ohne das komplette Modell neu zu trainieren."""

@@ -1,0 +1,39 @@
+<div class="evidence" [class.evidence--large]="large()">
+  <div
+    class="meter"
+    [class.meter--high]="tier() === 'high'"
+    [class.meter--mid]="tier() === 'mid'"
+    [class.meter--low]="tier() === 'low'"
+    [class.meter--estimate]="isEstimate()"
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="suggestion().match_percent"
+    [attr.aria-label]="suggestion().match_percent + ' Prozent Passung, ' + tierLabel()"
+  >
+    <span class="meter__fill" [style.width.%]="suggestion().match_percent"></span>
+    <span class="meter__tick meter__tick--mid" aria-hidden="true"></span>
+    <span class="meter__tick meter__tick--high" aria-hidden="true"></span>
+  </div>
+
+  <p class="evidence__tier muted muted--small">
+    {{ tierLabel() }}
+    @if (isEstimate()) {
+      · Schätzung über Genres
+    }
+  </p>
+
+  @if (reasons().length > 0) {
+    <ul class="reasons" aria-label="Warum dieser Vorschlag?">
+      @for (reason of reasons(); track reason.key) {
+        <li class="reason" [title]="reason.detail ?? ''">
+          <span class="reason__dot" aria-hidden="true"></span>
+          {{ reason.label }}
+          @if (large() && reason.detail) {
+            <span class="reason__detail">{{ reason.detail }}</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -813,6 +813,94 @@
         }
       }
     },
+    "/playlists/unsorted-tracks": {
+      "get": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Get Unsorted Tracks",
+        "description": "Lieblingssongs, die noch in keiner deiner Playlists liegen (Queue für den Triage-Modus).",
+        "operationId": "get_unsorted_tracks",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Maximale Anzahl Songs in der Triage-Queue",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximale Anzahl Songs in der Triage-Queue"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnsortedTracksResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Anfrage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Fehlende Berechtigung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Spotify nicht erreichbar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playlists/{playlist_id}": {
       "get": {
         "tags": [
@@ -2424,6 +2512,16 @@
               }
             ],
             "title": "Dominant Mood"
+          },
+          "avg_radar": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AudioRadarValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2497,6 +2595,13 @@
             },
             "type": "array",
             "title": "Top Genres"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/PlaylistSuggestionReason"
+            },
+            "type": "array",
+            "title": "Reasons"
           }
         },
         "type": "object",
@@ -2509,6 +2614,43 @@
           "already_in_playlist"
         ],
         "title": "PlaylistSuggestion"
+      },
+      "PlaylistSuggestionReason": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "genre",
+              "artist",
+              "bpm",
+              "mood",
+              "era"
+            ],
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "PlaylistSuggestionReason",
+        "description": "Ein nachvollziehbarer Grund, warum ein Song zu einer Playlist passt."
       },
       "PlaylistSuggestionsResponse": {
         "properties": {
@@ -2536,6 +2678,11 @@
               }
             ],
             "title": "Message"
+          },
+          "audio_ready": {
+            "type": "boolean",
+            "title": "Audio Ready",
+            "default": false
           }
         },
         "type": "object",
@@ -3086,6 +3233,33 @@
           "tracks"
         ],
         "title": "TrackSearchResponse"
+      },
+      "UnsortedTracksResponse": {
+        "properties": {
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/SpotifyTrack"
+            },
+            "type": "array",
+            "title": "Tracks"
+          },
+          "total_unsorted": {
+            "type": "integer",
+            "title": "Total Unsorted"
+          },
+          "scanned": {
+            "type": "integer",
+            "title": "Scanned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tracks",
+          "total_unsorted",
+          "scanned"
+        ],
+        "title": "UnsortedTracksResponse",
+        "description": "Lieblingssongs, die in keiner deiner bearbeitbaren Playlists liegen."
       },
       "UserProfile": {
         "properties": {

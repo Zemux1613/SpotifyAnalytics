@@ -1,0 +1,175 @@
+<div
+  #dialog
+  class="triage"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="triage-title"
+  tabindex="-1"
+>
+  <header class="triage__head">
+    <div>
+      <h2 id="triage-title">Triage</h2>
+      <p class="muted">
+        @if (finished()) {
+          Fertig
+        } @else if (!loading() && !error() && queue().length > 0) {
+          Song {{ index() + 1 }} von {{ queue().length }}
+          @if (totalUnsorted() > queue().length) {
+            · insgesamt {{ totalUnsorted() }} unsortiert
+          }
+        } @else {
+          Unsortierte Lieblingssongs
+        }
+      </p>
+    </div>
+    <div class="triage__stats muted" aria-live="polite">
+      <span><strong>{{ sortedCount() }}</strong> zugeordnet</span>
+      <span><strong>{{ skippedCount() }}</strong> übersprungen</span>
+    </div>
+    <button type="button" class="btn btn--ghost" (click)="close()">Beenden (Esc)</button>
+  </header>
+
+  <div
+    class="triage__progress"
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="progress()"
+    aria-label="Fortschritt der Triage"
+  >
+    <span [style.width.%]="progress()"></span>
+  </div>
+
+  @if (loading()) {
+    <p class="state">Lade unsortierte Songs … Beim ersten Mal wird dafür das Playlist-Modell gebaut.</p>
+  } @else if (error(); as message) {
+    <div class="state state--error" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" class="btn" (click)="loadQueue()">Erneut versuchen</button>
+    </div>
+  } @else if (queue().length === 0) {
+    <div class="triage__done">
+      <h3>Alles sortiert</h3>
+      <p class="muted">Keiner deiner Lieblingssongs liegt außerhalb deiner Playlists.</p>
+      <button type="button" class="btn" (click)="close()">Schließen</button>
+    </div>
+  } @else if (finished()) {
+    <div class="triage__done">
+      <h3>Queue durchgearbeitet</h3>
+      <p class="muted">
+        {{ sortedCount() }} Songs zugeordnet, {{ skippedCount() }} übersprungen.
+        @if (totalUnsorted() > queue().length || skippedCount() > 0) {
+          Es gibt noch unsortierte Songs.
+        }
+      </p>
+      <div class="triage__done-actions">
+        @if (totalUnsorted() > queue().length || skippedCount() > 0) {
+          <button type="button" class="btn" (click)="loadQueue()">Nächste Runde laden</button>
+        }
+        <button type="button" class="btn btn--ghost" (click)="close()">Schließen</button>
+      </div>
+    </div>
+  } @else if (current(); as track) {
+    <div class="triage__stage">
+      <section class="song" aria-label="Aktueller Song">
+        @if (cover(); as src) {
+          <img class="song__cover" [src]="src" [alt]="'Albumcover von ' + track.album.name" width="300" height="300" />
+        } @else {
+          <div class="song__cover song__cover--empty" aria-hidden="true"></div>
+        }
+        <h3 class="song__title">{{ track.name }}</h3>
+        <p class="song__artists">{{ artistNames() }}</p>
+        <p class="muted muted--small">{{ track.album.name }}</p>
+
+        <div class="song__radar">
+          @switch (card().radarState) {
+            @case ('ready') {
+              <app-radar-chart [series]="radarSeries()" />
+              <p class="song__vibe">
+                @if (card().bpm; as bpm) {
+                  <span>{{ bpm | number: '1.0-0' }} BPM</span>
+                }
+                @if (card().mood; as mood) {
+                  <span>{{ mood }}</span>
+                }
+              </p>
+            }
+            @case ('unavailable') {
+              <p class="state">Kein Preview für eine Audio-Analyse verfügbar.</p>
+            }
+            @default {
+              <p class="state" aria-live="polite">Audio wird analysiert …</p>
+            }
+          }
+        </div>
+      </section>
+
+      <section class="options" aria-label="Playlist-Vorschläge">
+        @switch (card().suggestionState) {
+          @case ('loading') {
+            <p class="state" aria-live="polite">Passende Playlists werden berechnet …</p>
+          }
+          @case ('error') {
+            <p class="state state--error" role="alert">{{ card().message }}</p>
+          }
+          @default {
+            @if (card().options.length === 0) {
+              <p class="state">
+                {{ card().message ?? 'Für diesen Song wurde keine passende Playlist gefunden.' }}
+                Mit S überspringst du ihn.
+              </p>
+            } @else {
+              <ol class="options__list">
+                @for (option of card().options; track option.playlist_id; let slot = $index) {
+                  <li>
+                    <button type="button" class="option" [class.option--best]="slot === 0" (click)="assign(slot)">
+                      <kbd class="option__key" aria-hidden="true">{{ slot + 1 }}</kbd>
+                      @if (option.image_url; as src) {
+                        <img class="option__cover" [src]="src" alt="" width="64" height="64" />
+                      } @else {
+                        <span class="option__cover option__cover--empty" aria-hidden="true"></span>
+                      }
+                      <span class="option__body">
+                        <span class="option__head">
+                          <span class="option__name">{{ option.name }}</span>
+                          <span class="option__percent">{{ option.match_percent }} %</span>
+                        </span>
+                        <span class="muted muted--small">
+                          {{ option.track_count }} Songs
+                          @if (option.top_genres?.length) {
+                            · {{ option.top_genres?.join(', ') }}
+                          }
+                        </span>
+                        <app-match-evidence [suggestion]="option" [large]="true" />
+                      </span>
+                    </button>
+                  </li>
+                }
+              </ol>
+            }
+            @if (!card().audioReady && card().radarState === 'loading') {
+              <p class="muted muted--small" aria-live="polite">
+                BPM- und Stimmungs-Gründe erscheinen, sobald die Audio-Analyse fertig ist.
+              </p>
+            }
+          }
+        }
+      </section>
+    </div>
+  }
+
+  @if (lastAssigned(); as last) {
+    <p class="triage__last muted muted--small" aria-live="polite">Zuletzt: {{ last }}</p>
+  }
+
+  @if (toast(); as message) {
+    <p class="triage__toast" role="alert">{{ message }}</p>
+  }
+
+  <footer class="triage__keys muted muted--small" aria-label="Tastenkürzel">
+    <span><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> zuordnen</span>
+    <span><kbd>Enter</kbd> bestes Match</span>
+    <span><kbd>S</kbd> / <kbd>→</kbd> überspringen</span>
+    <span><kbd>Esc</kbd> beenden</span>
+  </footer>
+</div>

@@ -23,5 +23,9 @@ class MissingPlaylistScopeError(Exception):
     """Dem Token fehlen die Playlist-Berechtigungen (nach Scope-Änderung neu einloggen)."""
 
 
+class MissingLibraryScopeError(Exception):
+    """Dem Token fehlt die Berechtigung für die Lieblingssongs (user-library-read)."""
+
+
 class InvalidRequestError(Exception):
     """Die Anfrage des Clients ist fachlich ungültig."""

@@ -1,0 +1,13 @@
+<svg viewBox="0 0 240 240" role="img" [attr.aria-label]="ariaLabel()">
+  <polygon class="grid" points="120,45 195,120 120,195 45,120" />
+  <polygon class="grid" points="120,82.5 157.5,120 120,157.5 82.5,120" />
+  <line class="axis" x1="120" y1="45" x2="120" y2="195" />
+  <line class="axis" x1="45" y1="120" x2="195" y2="120" />
+  @for (polygon of polygons(); track polygon.label) {
+    <polygon class="value" [class.value--b]="polygon.tone === 'b'" [attr.points]="polygon.points" />
+  }
+  <text x="120" y="27" text-anchor="middle">Tempo</text>
+  <text x="207" y="123">Helligkeit</text>
+  <text x="120" y="215" text-anchor="middle">Rhythmus</text>
+  <text x="7" y="123">Textur</text>
+</svg>

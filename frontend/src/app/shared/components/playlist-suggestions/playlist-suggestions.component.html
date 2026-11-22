@@ -42,21 +42,9 @@
               <span class="match__percent">{{ suggestion.match_percent }} %</span>
             </div>
 
-            <div
-              class="match__bar"
-              role="progressbar"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              [attr.aria-valuenow]="suggestion.match_percent"
-              [attr.aria-label]="suggestion.match_percent + ' Prozent Passung'"
-            >
-              <span [style.width.%]="suggestion.match_percent"></span>
-            </div>
+            <app-match-evidence class="match__evidence" [suggestion]="suggestion" />
 
             <div class="match__actions">
-              @if (suggestion.method === 'genre_fallback') {
-                <span class="match__tag">Genre-Schätzung</span>
-              }
               @if (isAdded(suggestion)) {
                 <span class="match__done">Bereits enthalten</span>
               } @else {
@@ -77,6 +65,12 @@
           </li>
         }
       </ul>
+
+      @if (audioPending()) {
+        <p class="note muted muted--small" aria-live="polite">
+          BPM- und Stimmungs-Abgleich folgt, sobald die Audio-Analyse fertig ist …
+        </p>
+      }
 
       <p class="note muted muted--small">
         Modell aus {{ count(result.model.playlists_used) }} Playlists und

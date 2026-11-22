@@ -3,7 +3,7 @@ import threading
 import time
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.clients.spotify_client import SpotifyClient
 from app.exceptions import (
@@ -14,8 +14,12 @@ from app.exceptions import (
 from app.services.playlist_classifier import PlaylistClassifier
 from app.services.playlist_service import PlaylistService
 
+if TYPE_CHECKING:
+    from app.services.audio_analysis_service import AudioAnalysisService
+
 logger = logging.getLogger(__name__)
 
+BPM_TOLERANCE = 8.0  # Abstand in BPM, ab dem Tempo nicht mehr als "passend" gilt
 CACHE_TTL = 30 * 60  # sekunden
 MAX_CACHED_MODELS = 8
 FETCH_WORKERS = 4
@@ -42,9 +46,11 @@ class RecommenderService:
         track: dict[str, Any],
         artists: list[dict[str, Any]],
         refresh: bool = False,
+        audio: "AudioAnalysisService | None" = None,
     ) -> dict[str, Any]:
         model, cached = self._get_model(access_token, session_id, refresh)
         suggestions = model.suggest(track, artists)
+        audio_ready = self._add_audio_reasons(model, suggestions, track.get("id"), audio)
         stats = model.stats()
         stats["cached"] = cached
 
@@ -63,6 +69,59 @@ class RecommenderService:
             "suggestions": suggestions,
             "model": stats,
             "message": message,
+            "audio_ready": audio_ready,
+        }
+
+    @staticmethod
+    def _add_audio_reasons(
+        model: PlaylistClassifier,
+        suggestions: list[dict[str, Any]],
+        track_id: str | None,
+        audio: "AudioAnalysisService | None",
+    ) -> bool:
+        """Ergänzt BPM-/Stimmungs-Gründe, sofern Track und Playlist bereits analysiert sind."""
+        if audio is None or not track_id:
+            return False
+        track_bpm, track_mood = audio.track_vibe(track_id)
+        if track_bpm is None:
+            return False
+
+        metrics = model.playlist_metrics()
+        for suggestion in suggestions:
+            ids = (metrics.get(suggestion["playlist_id"]) or {}).get("track_ids") or []
+            avg_bpm, dominant_mood = audio.playlist_vibe(ids)
+            if avg_bpm:
+                # librosa verwechselt gern halbes/doppeltes Tempo, beides gilt als passend
+                gap = min(abs(track_bpm - avg_bpm), abs(track_bpm * 2 - avg_bpm), abs(track_bpm / 2 - avg_bpm))
+                if gap <= BPM_TOLERANCE:
+                    suggestion["reasons"].append(
+                        {
+                            "key": "bpm",
+                            "label": "BPM passt",
+                            "detail": f"{round(track_bpm)} vs. Ø {round(avg_bpm)} BPM",
+                        }
+                    )
+            if dominant_mood and track_mood == dominant_mood:
+                suggestion["reasons"].append(
+                    {"key": "mood", "label": "Stimmung passt", "detail": dominant_mood}
+                )
+        return True
+
+    def get_unsorted_tracks(
+        self,
+        access_token: str,
+        session_id: str | None,
+        limit: int,
+    ) -> dict[str, Any]:
+        """Lieblingssongs, die in keiner der trainierten (= bearbeitbaren) Playlists liegen."""
+        model, _ = self._get_model(access_token, session_id, refresh=False)
+        known = model.all_track_ids()
+        saved = self._playlists.get_saved_tracks(access_token)
+        unsorted = [track for track in saved if track.get("id") not in known]
+        return {
+            "tracks": unsorted[:limit],
+            "total_unsorted": len(unsorted),
+            "scanned": len(saved),
         }
 
     def get_model_status(self, access_token: str, session_id: str | None) -> dict[str, Any]:

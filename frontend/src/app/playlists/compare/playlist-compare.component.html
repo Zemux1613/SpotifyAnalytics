@@ -1,0 +1,96 @@
+<div
+  #dialog
+  class="compare"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="compare-title"
+  tabindex="-1"
+>
+  <header class="compare__head">
+    <h2 id="compare-title">Playlist-Vergleich</h2>
+    <button type="button" class="btn btn--ghost" (click)="closed.emit()">Schließen (Esc)</button>
+  </header>
+
+  <div class="compare__who">
+    @for (pl of [a(), b()]; track pl.id; let i = $index) {
+      <div class="who" [class.who--b]="i === 1">
+        <span class="who__swatch" aria-hidden="true"></span>
+        @if (pl.image_url; as src) {
+          <img class="who__cover" [src]="src" alt="" width="48" height="48" />
+        } @else {
+          <span class="who__cover" aria-hidden="true"></span>
+        }
+        <span class="who__name" [title]="pl.name">{{ pl.name }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="compare__grid">
+    <section class="panel" aria-labelledby="compare-radar">
+      <h3 id="compare-radar">Klangprofil</h3>
+      @if (radarSeries().length > 0) {
+        <app-radar-chart [series]="radarSeries()" />
+        <p class="muted muted--small">Ø der bereits analysierten Songs je Playlist.</p>
+      }
+      @if (missingRadar().length > 0) {
+        <p class="state">
+          Noch keine Audio-Analyse für {{ missingRadar().join(' und ') }}. Analysierte Songs
+          (z. B. über den Triage-Modus oder den Song-Inspector) fließen automatisch ein.
+        </p>
+      }
+    </section>
+
+    <section class="panel" aria-labelledby="compare-genres">
+      <h3 id="compare-genres">Genre-Verteilung</h3>
+      @if (genreRows().length > 0) {
+        <ul class="genres">
+          @for (row of genreRows(); track row.name) {
+            <li class="genre">
+              <span class="genre__name">{{ row.name }}</span>
+              <span class="genre__bars">
+                <span class="bar">
+                  <span class="bar__fill" [style.width.%]="row.shareA * 100"></span>
+                  <span class="bar__value">{{ row.shareA * 100 | number: '1.0-0' }} %</span>
+                </span>
+                <span class="bar bar--b">
+                  <span class="bar__fill" [style.width.%]="row.shareB * 100"></span>
+                  <span class="bar__value">{{ row.shareB * 100 | number: '1.0-0' }} %</span>
+                </span>
+              </span>
+            </li>
+          }
+        </ul>
+        @if (overlapPercent() !== null) {
+          <p class="overlap">Genre-Überlappung: <strong>{{ overlapPercent() }} %</strong></p>
+        }
+        <p class="muted muted--small">Anteile innerhalb der jeweiligen Top-Genres.</p>
+      } @else {
+        <p class="state">Noch keine Genre-Daten im Modell.</p>
+      }
+    </section>
+
+    <section class="panel panel--wide" aria-labelledby="compare-facts">
+      <h3 id="compare-facts">Eckdaten</h3>
+      <table class="facts">
+        <thead>
+          <tr>
+            <th scope="col"><span class="visually-hidden">Kennzahl</span></th>
+            <th scope="col" class="facts__a">{{ a().name }}</th>
+            <th scope="col" class="facts__b">{{ b().name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Songs</th><td>{{ a().tracks_total }}</td><td>{{ b().tracks_total }}</td></tr>
+          <tr><th scope="row">Dauer</th><td>{{ duration(a().duration_ms) }}</td><td>{{ duration(b().duration_ms) }}</td></tr>
+          <tr>
+            <th scope="row">Ø BPM</th>
+            <td>{{ a().avg_bpm ? (a().avg_bpm | number: '1.0-0') : '–' }}</td>
+            <td>{{ b().avg_bpm ? (b().avg_bpm | number: '1.0-0') : '–' }}</td>
+          </tr>
+          <tr><th scope="row">Ø Jahr</th><td>{{ a().avg_release_year ?? '–' }}</td><td>{{ b().avg_release_year ?? '–' }}</td></tr>
+          <tr><th scope="row">Stimmung</th><td>{{ a().dominant_mood ?? '–' }}</td><td>{{ b().dominant_mood ?? '–' }}</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>

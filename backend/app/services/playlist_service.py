@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from app.clients.spotify_client import SpotifyClient
+from app.exceptions import MissingLibraryScopeError, SpotifyApiError
 from app.api.schemas import (
     ArtistRef,
     PlaylistDetailResponse,
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 MAX_PLAYLISTS = 50  # harte Obergrenze, damit das Training nicht ausufert
 MAX_TRACKS_PER_PLAYLIST = 300
+MAX_SAVED_TRACKS = 500  # so viele Lieblingssongs (neueste zuerst) werden nach "unsortiert" durchsucht
 ARTIST_BATCH = 50  # spotify erlaubt bei /artists maximal 50 ids pro aufruf
 
 
@@ -68,6 +70,29 @@ class PlaylistService:
             if not page.get("next") or not batch:
                 break
             offset += len(batch)
+        return tracks
+
+    def get_saved_tracks(self, access_token: str, limit: int = MAX_SAVED_TRACKS) -> list[dict[str, Any]]:
+        """Lieblingssongs des Users, neueste zuerst."""
+        tracks: list[dict[str, Any]] = []
+        offset = 0
+        try:
+            while len(tracks) < limit:
+                page = self._client.get(
+                    "/me/tracks", access_token, limit=min(50, limit - len(tracks)), offset=offset
+                )
+                batch = page.get("items") or []
+                for item in batch:
+                    track = item.get("track")
+                    if track and not track.get("is_local") and track.get("id"):
+                        tracks.append(track)
+                if not page.get("next") or not batch:
+                    break
+                offset += len(batch)
+        except SpotifyApiError as e:
+            if e.status_code == 403:
+                raise MissingLibraryScopeError() from e
+            raise
         return tracks
 
     def get_playlist_detail(
@@ -190,6 +215,7 @@ class PlaylistService:
                     avg_release_year=pl_metrics.get("avg_release_year"),
                     avg_bpm=pl_metrics.get("avg_bpm"),
                     dominant_mood=pl_metrics.get("dominant_mood"),
+                    avg_radar=pl_metrics.get("avg_radar"),
                 )
             )
 

@@ -1,0 +1,71 @@
+:host { display: block; }
+
+.meter {
+  position: relative;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.evidence--large .meter { height: 12px; }
+
+.meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+.meter--mid .meter__fill { background: color-mix(in srgb, var(--accent) 65%, var(--rank-dim)); }
+.meter--low .meter__fill { background: var(--rank-dim); }
+// geschätzte Werte (Genre-Fallback) sind gestreift, damit sie nicht wie Modell-Treffer wirken
+.meter--estimate .meter__fill {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 5px,
+    color-mix(in srgb, var(--bg) 45%, transparent) 5px 8px
+  );
+  background-color: inherit;
+}
+.meter--high.meter--estimate .meter__fill { background-color: var(--accent); }
+.meter--mid.meter--estimate .meter__fill { background-color: color-mix(in srgb, var(--accent) 65%, var(--rank-dim)); }
+.meter--low.meter--estimate .meter__fill { background-color: var(--rank-dim); }
+
+.meter__tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+.meter__tick--mid { left: 40%; }
+.meter__tick--high { left: 70%; }
+
+.evidence__tier { margin-top: 0.3rem; }
+
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+.reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.evidence--large .reason { font-size: 0.85rem; padding: 0.25rem 0.75rem; }
+.reason__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.reason__detail { color: var(--muted); font-weight: 500; }
