@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+# Alte Läufe zum selben Branch abbrechen, sobald ein neuer Commit gepusht wird.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  # ---------- Ermittelt, welche Bereiche sich geändert haben ----------
+  changes:
+    name: Änderungen ermitteln
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/**'
+            frontend:
+              - 'frontend/**'
+              - 'backend/openapi.json'
+              - 'openapi-generator.yaml'
+              - '.github/workflows/**'
+
+  # ---------- Backend: kompiliert und importiert die FastAPI-App ----------
+  backend:
+    name: Backend build
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Abhängigkeiten installieren
+        run: pip install -r requirements.txt
+
+      # Stellt sicher, dass die Spec im Repo zum tatsächlichen Backend-Code passt.
+      # Sonst würde das Frontend gegen veraltete Routen generiert.
+      - name: OpenAPI-Spec aktuell?
+        run: |
+          python scripts/export_openapi.py
+          if ! git diff --exit-code -- openapi.json; then
+            echo "backend/openapi.json ist veraltet. Bitte 'make openapi-spec' ausführen und committen." >&2
+            exit 1
+          fi
+
+      - name: Bytecode kompilieren
+        run: python -m compileall -q app
+
+      - name: App importieren (Startprüfung)
+        env:
+          SPOTIFY_CLIENT_ID: dummy
+          SPOTIFY_CLIENT_SECRET: dummy
+        run: python -c "from app.main import app; print(f'{len(app.routes)} Routen geladen')"
+
+  # ---------- Frontend: Angular-Produktionsbuild ----------
+  frontend:
+    name: Frontend build
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Der generierte API-Client ist gitignored und muss im CI neu erzeugt werden.
+      # Er hängt am Backend-Schema, deshalb löst auch backend/openapi.json diesen Job aus.
+      - name: API-Client generieren
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/local" \
+            -u "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            openapitools/openapi-generator-cli:v7.14.0 generate \
+            -i /local/backend/openapi.json \
+            -g typescript-angular \
+            -o /local/frontend/src/app/api/generated \
+            -c /local/openapi-generator.yaml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # Prüft, ob jede Operation aus der Spec auch als Methode im Client existiert.
+      - name: API-Routen im generierten Client prüfen
+        working-directory: frontend
+        run: node scripts/check-api-routes.mjs
+
+      # --prefer-offline nutzt den setup-node-Cache, lädt aber fehlende Pakete
+      # (z.B. bei neuen Dependabot-Versionen) trotzdem nach. Striktes --offline
+      # würde bei kaltem Cache bzw. neuen Paketen fehlschlagen.
+      - name: Abhängigkeiten installieren
+        working-directory: frontend
+        run: npm ci --prefer-offline
+
+      - name: Produktionsbuild
+        working-directory: frontend
+        run: npx ng build --configuration production
+
+  # ---------- Sammel-Check: immer grün, außer ein benötigter Job ist fehlgeschlagen ----------
+  # Nur dieser Job wird als Pflicht-Check in der Branch Protection eingetragen.
+  # So blockieren übersprungene (nicht benötigte) Builds den Merge nicht.
+  ci-passed:
+    name: CI passed
+    needs: [changes, backend, frontend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Job-Ergebnisse prüfen
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS"
+          if echo "$NEEDS" | jq -e '.[] | select(.result == "failure" or .result == "cancelled")' > /dev/null; then
+            echo "Mindestens ein benötigter Job ist fehlgeschlagen oder wurde abgebrochen."
+            exit 1
+          fi
+          echo "Alle benötigten Jobs erfolgreich oder übersprungen."
