@@ -1,17 +1,107 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
+
 updates:
+  # ---------- Frontend: Angular / npm ----------
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/frontend"
     schedule:
-      interval: "daily"
-      time: "19:01"
+      interval: "weekly"
+      day: "monday"
+      time: "19:00"
+      timezone: "Europe/Berlin"
+    # praktisch unbegrenzt: Dependabot soll alles anlegen, was es findet
+    open-pull-requests-limit: 100
+    versioning-strategy: "increase"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
+    groups:
+      # Angular-Pakete müssen zusammen aktualisiert werden
+      angular:
+        patterns:
+          - "@angular/*"
+          - "angular-eslint"
+      # Kleine Updates gebündelt, Majors bleiben einzelne PRs
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    # Erst nach einer Woche veröffentlichen, schützt vor kompromittierten Releases
+    cooldown:
+      default-days: 7
+
+  # ---------- Backend: Python / pip ----------
   - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "19:00"
+      timezone: "Europe/Berlin"
+    # praktisch unbegrenzt: Dependabot soll alles anlegen, was es findet
+    open-pull-requests-limit: 100
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    cooldown:
+      default-days: 7
+
+  # ---------- Docker-Images ----------
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "monthly"
+    # praktisch unbegrenzt: Dependabot soll alles anlegen, was es findet
+    open-pull-requests-limit: 100
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+    cooldown:
+      default-days: 14
+
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "monthly"
+    # praktisch unbegrenzt: Dependabot soll alles anlegen, was es findet
+    open-pull-requests-limit: 100
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+    cooldown:
+      default-days: 14
+
+  # ---------- GitHub Actions ----------
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-      time: "19:01"
+      interval: "monthly"
+    # praktisch unbegrenzt: Dependabot soll alles anlegen, was es findet
+    open-pull-requests-limit: 100
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "ci"
+    groups:
+      actions:
+        patterns:
+          - "*"
