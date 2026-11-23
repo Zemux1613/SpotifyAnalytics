@@ -5,12 +5,21 @@
       <p class="muted">Deine meistgehörten Artists und Tracks auf Spotify</p>
     </div>
 
-    <div class="segmented" role="group" aria-label="Zeitraum">
-      @for (r of ranges; track r.value) {
-        <button type="button" [attr.aria-pressed]="range() === r.value" (click)="select(r.value)">
-          {{ r.label }}
-        </button>
+    <div class="page__controls">
+      @if (!loading() && tasteScore(); as score) {
+        <div class="taste-badge" title="Durchschnittliche weltweite Spotify-Popularität deiner Top-Items (0–100)">
+          <span class="taste-badge__label">{{ score.label }}</span>
+          <span class="taste-badge__value">Ø {{ score.avg }}/100</span>
+        </div>
       }
+
+      <div class="segmented" role="group" aria-label="Zeitraum">
+        @for (r of ranges; track r.value) {
+          <button type="button" [attr.aria-pressed]="range() === r.value" (click)="select(r.value)">
+            {{ r.label }}
+          </button>
+        }
+      </div>
     </div>
   </div>
 
@@ -87,46 +96,69 @@
 
       <!-- TOP TRACKS -->
       <section class="card top-card" aria-labelledby="top-tracks">
-        <div class="card__head">
+        <div class="card__head card__head--split">
           <h2 id="top-tracks">Top Tracks</h2>
+
+          @if (hiddenGemCount() > 0) {
+            <button
+              type="button"
+              class="gem-filter"
+              [attr.aria-pressed]="onlyHiddenGems()"
+              (click)="onlyHiddenGems.set(!onlyHiddenGems())"
+            >
+              Nur Geheimtipps ({{ hiddenGemCount() }})
+            </button>
+          }
         </div>
 
         @if (tracks().length === 0) {
           <p class="state">In diesem Zeitraum gibt es noch keine Daten. Höre ein paar Songs und schau später wieder vorbei.</p>
+        } @else if (visibleTracks().length === 0) {
+          <p class="state">Keine Geheimtipps in deinen Top 25 für diesen Zeitraum gefunden.</p>
         } @else {
           <ol class="rank-list">
-            @for (track of visibleTracks(); track track.id) {
+            @for (entry of visibleTracks(); track entry.track.id) {
               <li>
                 <button
                   type="button"
                   class="item item--button"
-                  [class.item--podium]="$index < 3"
-                  [attr.aria-current]="track.id === inspector.currentId()"
-                  (click)="inspect(track)"
+                  [class.item--podium]="entry.rank <= 3"
+                  [attr.aria-current]="entry.track.id === inspector.currentId()"
+                  (click)="inspect(entry.track)"
                 >
-                  <span class="rank" [class.rank--top]="$index < 3">{{ $index + 1 }}</span>
+                  <span class="rank" [class.rank--top]="entry.rank <= 3">{{ entry.rank }}</span>
 
-                  @if (image(track.album.images, 112); as src) {
+                  @if (image(entry.track.album.images, 112); as src) {
                     <img class="cover-s" [src]="src" alt="" width="56" height="56" loading="lazy">
                   } @else {
                     <span class="cover-s avatar--empty"></span>
                   }
 
                   <div class="item__text">
-                    <span class="item__title">{{ track.name }}</span>
-                    <span class="muted">{{ artistNames(track) }}</span>
+                    <div class="item__title-row">
+                      <span class="item__title">{{ entry.track.name }}</span>
+                      @if (entry.isHiddenGem) {
+                        <span
+                          class="gem-badge"
+                          [title]="'Weltweite Popularität: ' + entry.track.popularity + '/100'"
+                        >
+                          Geheimtipp
+                        </span>
+                      }
+                    </div>
+                    <span class="muted">{{ artistNames(entry.track) }}</span>
                   </div>
 
-                  <span class="item__aside muted">{{ track.duration_ms | duration }}</span>
+                  <span class="item__aside muted">{{ entry.track.duration_ms | duration }}</span>
                   <span class="item__ext" aria-hidden="true">Details →</span>
                 </button>
               </li>
             }
           </ol>
 
-          @if (tracks().length > 10) {
+          @if (rankedTracks().length > 10) {
             <button type="button" class="btn btn--ghost top-card__more" (click)="showAllTracks.set(!showAllTracks())">
-              {{ showAllTracks() ? 'Weniger anzeigen' : 'Alle ' + tracks().length + ' anzeigen' }}
+              {{ showAllTracks() ? 'Weniger anzeigen' : 'Alle ' + rankedTracks().length + ' anzeigen' }}
             </button>
           }
         }
