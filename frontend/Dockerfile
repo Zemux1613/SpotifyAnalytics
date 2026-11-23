@@ -1,5 +1,5 @@
 # ---------- stage 1: dependencies (gemeinsame Basis für dev und build) ----------
-FROM node:22-alpine AS deps
+FROM node:25-alpine AS deps
 
 ENV NG_CLI_ANALYTICS=false
 
